@@ -1,7 +1,10 @@
+# :warning: These are not updated
+
 # My CCET
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 **Table of Contents**
 
 - [How to setup the project](#how-to-setup-the-project)
@@ -101,7 +104,6 @@ graph LR
 
 ```
 
-
 ### Folder Structure
 
 ```
@@ -123,7 +125,6 @@ graph LR
 │       └── logger.util.ts
 ```
 
-
 ### Adding a new functionality
 
 1. Ensure that you have the latest version of the `main` branch by running the following command in your terminal:
@@ -140,23 +141,23 @@ git checkout -b <branch-name>
 
 3. Make sure that model is created for the new functionality in the `models` folder.
 
-    > Eg: If you are creating a route to register a user, then make sure that the `user.model.ts` file is created in the `models` folder.
-    > and all the required fields are added to the model.
+   > Eg: If you are creating a route to register a user, then make sure that the `user.model.ts` file is created in the `models` folder.
+   > and all the required fields are added to the model.
 
 4. Create a new schema for the new functionality in the `schemas` folder.
 
-    > Eg: If you are creating a route to register a user, then make sure that the `user.schema.ts` file is created in the `schemas` folder.
-    > and all the required fields are added to the schema.
+   > Eg: If you are creating a route to register a user, then make sure that the `user.schema.ts` file is created in the `schemas` folder.
+   > and all the required fields are added to the schema.
 
 5. Create a new controller for the new functionality in the `controllers` folder.
 
-    > Eg: If you are creating a route to register a user, then make sure that the `auth.controller.ts` file is created in the `controllers` folder.
-    > and all the required functions are added to the controller.
+   > Eg: If you are creating a route to register a user, then make sure that the `auth.controller.ts` file is created in the `controllers` folder.
+   > and all the required functions are added to the controller.
 
 6. Create a new route for the new functionality in the `routes` folder.
 
-    > Eg: If you are creating a route to register a user, then make sure that the `auth.routes.ts` file is created in the `routes` folder.
-    > and all the required routes are added to the routes file.
+   > Eg: If you are creating a route to register a user, then make sure that the `auth.routes.ts` file is created in the `routes` folder.
+   > and all the required routes are added to the routes file.
 
 7. Register the new routes in the `app.ts` file.
 
