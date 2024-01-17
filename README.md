@@ -77,12 +77,7 @@ To create super admin run the following command in your terminal:
 ```bash
 yarn build
 
-# git-bash for Windows
-yarn global add $PWD
-# zsh, bash etc. for mac OS
-yarn global add file:$PWD
-
-myccet create-admin -f <first name> -l <last name> -e <email> -p <phone number> -s <password>
+node build/bin/index.js create-admin -f <first-name> -e <email> -p <phone number> -s <password>
 ```
 
 > :warning: make sure to run the command in the root directory of the project and replace the values in <> with the actual values.

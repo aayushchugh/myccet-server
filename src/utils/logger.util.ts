@@ -48,23 +48,23 @@ class Logger {
 		],
 	});
 
-	error(message: string) {
+	public error(message: string) {
 		this.errorLogger.error(message);
 	}
 
-	security(message: string) {
+	public security(message: string) {
 		this.securityLogger.warn(message);
 	}
 
-	http(message: string) {
+	public http(message: string) {
 		this.httpLogger.http(message);
 	}
 
-	db(message: string) {
+	public db(message: string) {
 		this.dbLogger.verbose(message);
 	}
 
-	operation(message: string) {
+	public operation(message: string) {
 		this.operationLogger.info(message);
 	}
 }

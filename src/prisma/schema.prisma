@@ -17,11 +17,12 @@ enum UserRoles {
 }
 
 model User{
-  id Int @default(autoincrement()) @id
+  id Int @default(autoincrement()) @id @unique
   fName String 
   mName String?
   lName String?
   email String @unique
-  phone Int @unique
+  phone BigInt @unique
   password String
+  role UserRoles
 }
