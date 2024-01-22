@@ -1,18 +1,24 @@
-import { Prisma } from "@prisma/client";
-import prisma from "../../prisma/prisma";
-import loggerUtil from "../../utils/logger.util";
+import { User } from "@prisma/client";
+import { compare } from "bcrypt";
+import { signJwtTokenUtil } from "../../common/utils/jwt.util";
 
 /**
- * Create new user in database
- * @param payload user data
- * @returns created user
+ * Check if the password is correct
+ *
+ * @param password hashed password
+ * @param user the user object from database
  */
-export const createUserService = async (payload: Prisma.UserCreateInput) => {
-	const user = await prisma.user.create({
-		data: payload,
-	});
+export const checkUserPasswordService = async (
+	password: string,
+	user: User
+) => {
+	return await compare(password, user.password);
+};
 
-	loggerUtil.db(`User created with id: ${user.id}`);
-
-	return user;
+/**
+ * Generates a jwt token for the user
+ * @param user the user from database
+ */
+export const signAccessTokenService = (user: User) => {
+	return signJwtTokenUtil({ userId: user.id }, { expiresIn: "1d" });
 };
