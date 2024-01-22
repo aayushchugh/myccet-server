@@ -241,9 +241,16 @@ All the API endpoints return the response in the following format:
 	"success": false,
 	"statusCode": 409,
 	"error": {
-		"message": "UserModel already exists"
+		"detail": "User already exists",
+		"code": "USER_ALREADY_EXISTS"
 	}
 }
 ```
 
 > :warning: Make sure that the response is returned in the above format only and contains proper status codes.
+
+## Error codes
+
+| Code                 |              Description              |
+| -------------------- | :-----------------------------------: |
+| INVALID_REQUEST_BODY | Request body doesn't match zod schema |
