@@ -6,6 +6,7 @@ import { config } from "dotenv";
 import { hideBin } from "yargs/helpers";
 import prisma from "../src/prisma/prisma";
 import chalk from "chalk";
+import { hash, genSalt } from "bcrypt";
 config();
 
 yargs(hideBin(process.argv))
@@ -50,13 +51,16 @@ yargs(hideBin(process.argv))
 			try {
 				await prisma.$connect();
 
+				const salt = await genSalt(10);
+				const hashedPassword = await hash(args.password, salt);
+
 				await prisma.user.create({
 					data: {
 						email: args.email,
 						fName: args.fname,
 						lName: args.lname,
 						phone: +args.phone,
-						password: args.password,
+						password: hashedPassword,
 						role: "SUPERADMIN",
 					},
 				});
