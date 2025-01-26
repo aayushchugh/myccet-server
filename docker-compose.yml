@@ -6,11 +6,11 @@ services:
     restart: unless-stopped
     container_name: api.myccet.infyfix.com.postgres
     environment:
-      DB_POSTGRES_USER: ${DB_POSTGRES_USER}
-      DB_POSTGRES_PASSWORD: ${DB_POSTGRES_PASSWORD}
-      DB_POSTGRES_DB: ${DB_POSTGRES_DB}
-      DB_POSTGRES_HOST: ${DB_POSTGRES_HOST}
-      DB_POSTGRES_PORT: ${DB_POSTGRES_PORT}
+      DB_POSTGRES_USER: postgres
+      DB_POSTGRES_PASSWORD: postgres
+      DB_POSTGRES_DB: postgres
+      DB_POSTGRES_HOST: localhost
+      DB_POSTGRES_PORT: 5433
     volumes:
       - psql_volume_bp:/var/lib/postgresql/data
   api_myccet_infyfix_com_server:
