@@ -3,7 +3,9 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
-		"start:dev": "tsnd --exit-child --transpile-only src/index.ts",
+		"dev": "tsnd --exit-child --transpile-only src/index.ts",
+		"build": "tsc",
+		"start": "node dist/src/index.js",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio"

@@ -1,15 +1,34 @@
 services:
-  postgres:
+  api_myccet_infyfix_com_postgres:
     image: postgres:latest
     ports:
-      - "5432:5432"
+      - "5433:5432"
     restart: unless-stopped
+    container_name: api.myccet.infyfix.com.postgres
     environment:
-      POSTGRES_USER: ${DB_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${DB_POSTGRES_PASSWORD}
-      POSTGRES_DB: ${DB_POSTGRES_DB}
+      DB_POSTGRES_USER: ${DB_POSTGRES_USER}
+      DB_POSTGRES_PASSWORD: ${DB_POSTGRES_PASSWORD}
+      DB_POSTGRES_DB: ${DB_POSTGRES_DB}
+      DB_POSTGRES_HOST: ${DB_POSTGRES_HOST}
+      DB_POSTGRES_PORT: ${DB_POSTGRES_PORT}
     volumes:
       - psql_volume_bp:/var/lib/postgresql/data
+  api_myccet_infyfix_com_server:
+    image: api.myccet.infyfix.com
+    container_name: api.myccet.infyfix.com
+    depends_on:
+      - api_myccet_infyfix_com_postgres
+    working_dir: /app
+    ports:
+      - "3007:8000"
+    expose:
+      - "8000"
+    command: "npm start"
+    environment:
+      NODE_ENV: production
+    build:
+      context: .
+      dockerfile: Dockerfile
 
 volumes:
   psql_volume_bp:
