@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import healthRouter from "./modules/health/health.routes";
+import healthRouter from "@/modules/health/health.routes";
 
 const app = express();
 

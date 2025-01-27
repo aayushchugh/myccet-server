@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import db from "../../db";
+import db from "@/db";
 import { sql } from "drizzle-orm";
 
 export async function getHeathHandler(req: Request, res: Response) {
