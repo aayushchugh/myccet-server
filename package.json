@@ -3,9 +3,9 @@
 	"version": "1.0.0",
 	"main": "index.js",
 	"scripts": {
-		"dev": "tsnd --exit-child --transpile-only src/index.ts",
+		"dev": "tsnd -r tsconfig-paths/register --exit-child --transpile-only src/index.ts",
 		"build": "tsc",
-		"start": "node dist/src/index.js",
+		"start": "node -r module-alias/register dist/src/index.js",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio"
@@ -22,12 +22,17 @@
 		"drizzle-orm": "^0.38.4",
 		"express": "^4.21.2",
 		"http-status-codes": "^2.3.0",
-		"pg": "^8.13.1"
+		"pg": "^8.13.1",
+		"module-alias": "^2.3.0"
 	},
 	"devDependencies": {
 		"@types/pg": "^8.11.11",
 		"drizzle-kit": "^0.30.2",
 		"ts-node-dev": "^2.0.0",
-		"tsx": "^4.19.2"
+		"tsx": "^4.19.2",
+		"tsconfig-paths": "^4.2.0"
+	},
+	"_moduleAliases": {
+		"@": "dist/src"
 	}
 }
