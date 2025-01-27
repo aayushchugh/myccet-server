@@ -1,0 +1,18 @@
+services:
+  api_myccet_infyfix_com_postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    container_name: api.myccet.infyfix.com.postgres
+    environment:
+      DB_POSTGRES_USER: postgres
+      DB_POSTGRES_PASSWORD: postgres
+      DB_POSTGRES_DB: postgres
+      DB_POSTGRES_HOST: localhost
+      DB_POSTGRES_PORT: 5433
+    volumes:
+      - psql_volume_bp:/var/lib/postgresql/data
+
+volumes:
+  psql_volume_bp:
