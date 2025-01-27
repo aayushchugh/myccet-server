@@ -20,6 +20,8 @@ export async function getHeathHandler(req: Request, res: Response) {
 			message: "Server is running",
 		});
 	} catch (err) {
+		console.log(err);
+
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 			message: "Internal server error",
 			status: StatusCodes.INTERNAL_SERVER_ERROR,
