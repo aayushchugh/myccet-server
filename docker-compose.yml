@@ -28,11 +28,11 @@ services:
     command: "npm start"
     environment:
       NODE_ENV: production
-      DB_POSTGRES_HOST: api_myccet_infyfix_com_postgres
-      DB_POSTGRES_PORT: 5432
-      DB_POSTGRES_USER: postgres
-      DB_POSTGRES_PASSWORD: postgres
-      DB_POSTGRES_DB: postgres
+      POSTGRES_HOST: api_myccet_infyfix_com_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
 
 volumes:
   psql_volume_bp:
