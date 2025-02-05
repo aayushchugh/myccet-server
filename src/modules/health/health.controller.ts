@@ -13,13 +13,11 @@ export async function getHeathHandler(req: Request, res: Response) {
 
 			res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 				message: "Database is not connected",
-				status: StatusCodes.INTERNAL_SERVER_ERROR,
 			});
 			return;
 		}
 
 		res.status(StatusCodes.OK).json({
-			status: StatusCodes.OK,
 			message: "Server is running",
 		});
 	} catch (err: any) {
@@ -27,7 +25,6 @@ export async function getHeathHandler(req: Request, res: Response) {
 
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 			message: "Internal server error",
-			status: StatusCodes.INTERNAL_SERVER_ERROR,
 		});
 	}
 }
