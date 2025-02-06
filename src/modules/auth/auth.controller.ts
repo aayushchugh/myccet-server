@@ -34,6 +34,8 @@ export async function postSignupHandler(
 			res.status(StatusCodes.FORBIDDEN).json({
 				message: "admin account already exists",
 			});
+
+			return;
 		}
 
 		const salt = await bcryptjs.genSalt(10);
@@ -105,17 +107,18 @@ export async function postLoginHandler(
 		const sessionToken = generateSessionToken();
 		const session = await createSession(sessionToken, user[0].id);
 
-		// set session in cookie
-		res.cookie("session", sessionToken, {
-			httpOnly: true,
-			expires: session.expires_at,
-		});
-
-		res.status(StatusCodes.OK).json({
-			message: "login successful",
-		});
-
 		logger.info(`User logged in with email: ${email}`, "AUTH");
+
+		// set session in cookie
+		res
+			.cookie("session", sessionToken, {
+				httpOnly: true,
+				expires: session.expires_at,
+			})
+			.status(StatusCodes.OK)
+			.json({
+				message: "login successful",
+			});
 
 		return;
 	} catch (err) {
