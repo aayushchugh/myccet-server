@@ -1,13 +1,18 @@
 import { Router } from "express";
-import { postAdminSignupHandler } from "./auth.controller";
+import { postLoginHandler, postSignupHandler } from "./auth.controller";
 import { validateRequestBody } from "../../middlewares/validate-request.middleware";
-import { postAdminSignupBodySchema } from "./auth.schema";
+import { postLoginBodySchema, postSignupBodySchema } from "./auth.schema";
 
 const authRouter = Router();
 authRouter.post(
-	"/admin/auth/signup",
-	validateRequestBody(postAdminSignupBodySchema),
-	postAdminSignupHandler
+	"/signup",
+	validateRequestBody(postSignupBodySchema),
+	postSignupHandler
+);
+authRouter.post(
+	"/login",
+	validateRequestBody(postLoginBodySchema),
+	postLoginHandler
 );
 
 export default authRouter;

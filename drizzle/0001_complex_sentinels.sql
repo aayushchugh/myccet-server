@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "designation" varchar(255) DEFAULT 'lecturer' NOT NULL;
