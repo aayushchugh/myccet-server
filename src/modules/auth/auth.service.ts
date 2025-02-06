@@ -1,4 +1,5 @@
 import { Session, sessionTable } from "../../db/schema/session";
+import crypto from "crypto";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { User, userTable } from "../../db/schema/user";
 import db from "../../db";
