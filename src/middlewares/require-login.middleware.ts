@@ -22,7 +22,7 @@ export async function requireLoginMiddleware(
 
 		if (!sessionToken) {
 			res.status(StatusCodes.UNAUTHORIZED).json({
-				error: "user must be logged in to access this route",
+				message: "user must be logged in to access this route",
 			});
 			return;
 		}
@@ -32,7 +32,7 @@ export async function requireLoginMiddleware(
 
 		if (!session || !user) {
 			res.status(StatusCodes.UNAUTHORIZED).json({
-				error: "user must be logged in to access this route",
+				message: "user must be logged in to access this route",
 			});
 
 			return;
@@ -46,7 +46,7 @@ export async function requireLoginMiddleware(
 		console.error(err);
 
 		res.status(StatusCodes.UNAUTHORIZED).json({
-			error: "user must be logged in to access this route",
+			message: "user must be logged in to access this route",
 		});
 	}
 }

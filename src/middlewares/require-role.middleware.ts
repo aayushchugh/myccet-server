@@ -9,7 +9,7 @@ export function requireRoleMiddleware(role: Role) {
 
 			if (!user) {
 				res.status(StatusCodes.UNAUTHORIZED).json({
-					error: "user must be logged in to access this route",
+					message: "user must be logged in to access this route",
 				});
 
 				return;
@@ -17,7 +17,7 @@ export function requireRoleMiddleware(role: Role) {
 
 			if (user.role !== role) {
 				res.status(StatusCodes.FORBIDDEN).json({
-					error: "user does not have the required role to access this route",
+					message: "user does not have the required role to access this route",
 				});
 
 				return;
@@ -26,7 +26,7 @@ export function requireRoleMiddleware(role: Role) {
 			next();
 		} catch (err) {
 			res.status(StatusCodes.FORBIDDEN).json({
-				error: "user does not have the required role to access this route",
+				message: "user does not have the required role to access this route",
 			});
 
 			return;

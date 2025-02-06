@@ -32,7 +32,7 @@ export async function postSignupHandler(
 
 		if (admins.length) {
 			res.status(StatusCodes.FORBIDDEN).json({
-				error: "admin account already exists",
+				message: "admin account already exists",
 			});
 		}
 
@@ -85,7 +85,7 @@ export async function postLoginHandler(
 
 		if (!user.length) {
 			res.status(StatusCodes.NOT_FOUND).json({
-				error: "user not found",
+				message: "user not found",
 			});
 
 			return;
@@ -95,7 +95,7 @@ export async function postLoginHandler(
 
 		if (!isValid) {
 			res.status(StatusCodes.UNAUTHORIZED).json({
-				error: "invalid password",
+				message: "invalid password",
 			});
 
 			return;

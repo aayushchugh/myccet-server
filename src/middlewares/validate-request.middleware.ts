@@ -20,7 +20,7 @@ export function validateRequestBody(schema: z.ZodObject<any, any>) {
 			} else {
 				res
 					.status(StatusCodes.INTERNAL_SERVER_ERROR)
-					.json({ error: "Internal Server Error" });
+					.json({ message: "Internal Server Error" });
 			}
 		}
 	};

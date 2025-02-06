@@ -75,7 +75,7 @@ export async function postAdminHandler(
 		}
 
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-			error: "Internal server error",
+			message: "Internal server error",
 		});
 	}
 }
