@@ -36,7 +36,8 @@ export async function postSignupHandler(
 			});
 		}
 
-		const hashedPassword = await bcryptjs.hash(password, 10);
+		const salt = await bcryptjs.genSalt(10);
+		const hashedPassword = await bcryptjs.hash(password, salt);
 
 		// Create new admin account
 		await db.insert(userTable).values({
@@ -52,7 +53,7 @@ export async function postSignupHandler(
 			updated_at: new Date(),
 		});
 
-		logger.info(`Admin account created with email: ${email}`, "SYSTEM");
+		logger.info(`Admin account created with email: ${email}`, "AUTH");
 
 		res.status(StatusCodes.CREATED).json({
 			message: "account created successfully",
@@ -113,6 +114,8 @@ export async function postLoginHandler(
 		res.status(StatusCodes.OK).json({
 			message: "login successful",
 		});
+
+		logger.info(`User logged in with email: ${email}`, "AUTH");
 
 		return;
 	} catch (err) {

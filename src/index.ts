@@ -6,6 +6,7 @@ import logger, { LoggerServices } from "./libs/logger";
 import authRouter from "./modules/auth/auth.routes";
 import cookieParser from "cookie-parser";
 import { requireLoginMiddleware } from "./middlewares/require-login.middleware";
+import adminRouter from "./modules/admin/admin.router";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use("/auth", authRouter);
 
 // Only allow logged in users to access the following routes
 app.use(requireLoginMiddleware);
+app.use("/admin", adminRouter);
 
 const PORT = process.env.PORT || 8000;
 

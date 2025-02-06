@@ -2,7 +2,6 @@
 	"name": "myccet-server",
 	"version": "1.0.0",
 	"main": "index.js",
-	"type": "module",
 	"scripts": {
 		"dev": "tsnd -r tsconfig-paths/register --exit-child --transpile-only src/index.ts",
 		"build": "tsc",
