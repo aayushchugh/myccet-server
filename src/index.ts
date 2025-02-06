@@ -7,12 +7,15 @@ import authRouter from "./modules/auth/auth.routes";
 import cookieParser from "cookie-parser";
 import { requireLoginMiddleware } from "./middlewares/require-login.middleware";
 import adminRouter from "./modules/admin/admin.router";
+import { requestLoggerMiddleware } from "./middlewares/request-logger.middleware";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(requestLoggerMiddleware);
 
 app.use("/health", healthRouter);
 app.use("/auth", authRouter);

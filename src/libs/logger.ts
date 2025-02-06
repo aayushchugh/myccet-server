@@ -40,7 +40,8 @@ export type LoggerServices =
 	| "HEALTH"
 	| "STUDENT"
 	| "TEACHER"
-	| "ADMIN";
+	| "ADMIN"
+	| "HTTP";
 
 namespace logger {
 	export function info(
