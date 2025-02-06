@@ -25,7 +25,7 @@ services:
       - "3007:8000"
     expose:
       - "8000"
-    command: "npm start"
+    command: sh -c "npm run db:migrate && npm start"
     environment:
       NODE_ENV: production
       POSTGRES_HOST: api_myccet_infyfix_com_postgres
