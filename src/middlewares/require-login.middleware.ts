@@ -18,7 +18,14 @@ export async function requireLoginMiddleware(
 ) {
 	try {
 		// get session from cookie
-		const sessionToken = req.headers.authorization;
+		const authHeader = req.headers.authorization;
+		if (!authHeader || !authHeader.startsWith("Bearer ")) {
+			res.status(StatusCodes.UNAUTHORIZED).json({
+				message: "user must be logged in to access this route",
+			});
+			return;
+		}
+		const sessionToken = authHeader.split(" ")[1];
 
 		if (!sessionToken) {
 			res.status(StatusCodes.UNAUTHORIZED).json({
