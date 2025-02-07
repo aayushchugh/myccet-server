@@ -105,19 +105,17 @@ export async function postLoginHandler(
 
 		// Create session
 		const sessionToken = generateSessionToken();
-		const session = await createSession(sessionToken, user[0].id);
+		await createSession(sessionToken, user[0].id);
 
 		logger.info(`User logged in with email: ${email}`, "AUTH");
 
 		// set session in cookie
-		res
-			.cookie("session", sessionToken, {
-				expires: session.expires_at,
-			})
-			.status(StatusCodes.OK)
-			.json({
-				message: "login successful",
-			});
+		res.status(StatusCodes.OK).json({
+			message: "login successful",
+			payload: {
+				access_token: sessionToken,
+			},
+		});
 
 		return;
 	} catch (err) {

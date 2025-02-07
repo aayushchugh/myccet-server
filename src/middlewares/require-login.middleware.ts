@@ -18,7 +18,7 @@ export async function requireLoginMiddleware(
 ) {
 	try {
 		// get session from cookie
-		const sessionToken = req.cookies.session;
+		const sessionToken = req.headers.authorization;
 
 		if (!sessionToken) {
 			res.status(StatusCodes.UNAUTHORIZED).json({
