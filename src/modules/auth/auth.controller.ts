@@ -112,7 +112,6 @@ export async function postLoginHandler(
 		// set session in cookie
 		res
 			.cookie("session", sessionToken, {
-				httpOnly: true,
 				expires: session.expires_at,
 			})
 			.status(StatusCodes.OK)
