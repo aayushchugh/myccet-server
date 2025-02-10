@@ -4,7 +4,7 @@ import { PostLoginBody, PostSignupBody } from "./auth.schema";
 import { userTable } from "../../db/schema/user";
 import bcryptjs from "bcryptjs";
 import db from "../../db";
-import { eq } from "drizzle-orm";
+import { or, eq } from "drizzle-orm";
 import logger from "../../libs/logger";
 import { createSession, generateSessionToken } from "./auth.service";
 
@@ -38,6 +38,20 @@ export async function postSignupHandler(
 			return;
 		}
 
+		const existingUser = await db
+			.select()
+			.from(userTable)
+			.where(or(eq(userTable.email, email), eq(userTable.phone, phone)));
+
+		if (existingUser.length) {
+			const duplicateField = existingUser.some((user) => user.email === email)
+				? "Email"
+				: "Phone Number";
+			return res.status(StatusCodes.CONFLICT).json({
+				message: `${duplicateField} is already registered`,
+			});
+		}
+		// Hash the password before storing
 		const salt = await bcryptjs.genSalt(10);
 		const hashedPassword = await bcryptjs.hash(password, salt);
 
