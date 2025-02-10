@@ -23,7 +23,11 @@ export async function postSignupHandler(
 			role,
 			designation,
 		} = req.body;
-
+		if (!email || !password || !first_name || !phone || !role || !designation) {
+			return res.status(StatusCodes.BAD_REQUEST).json({
+				message: "All fields are required",
+			});
+		}
 		// Check if admin already exists
 		const admins = await db
 			.select()
