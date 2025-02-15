@@ -7,6 +7,7 @@ import db from "../../db";
 import { eq } from "drizzle-orm";
 import logger from "../../libs/logger";
 import { createSession, generateSessionToken } from "./auth.service";
+import { error } from "winston";
 
 export async function postSignupHandler(
 	req: Request<{}, {}, PostSignupBody>,
@@ -88,6 +89,7 @@ export async function postLoginHandler(
 		if (!user.length) {
 			res.status(StatusCodes.NOT_FOUND).json({
 				message: "user not found",
+				errors: [{ email: "user not found" }],
 			});
 
 			return;
@@ -98,6 +100,7 @@ export async function postLoginHandler(
 		if (!isValid) {
 			res.status(StatusCodes.UNAUTHORIZED).json({
 				message: "invalid password",
+				errors: [{ password: "invalid password" }],
 			});
 
 			return;
