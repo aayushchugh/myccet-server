@@ -84,7 +84,15 @@ export async function postAdminHandler(
 export async function getAllAdminsHandler(req: Request, res: Response) {
   try {
     const admins = await db
-      .select()
+      .select({
+        id: userTable.id,
+        email: userTable.email,
+        first_name: userTable.first_name,
+        middle_name: userTable.middle_name,
+        last_name: userTable.last_name,
+        phone: userTable.phone,
+        designation: userTable.designation,
+      })
       .from(userTable)
       .where(eq(userTable.role, Role.ADMIN));
 

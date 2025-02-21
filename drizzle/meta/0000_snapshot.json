@@ -1,5 +1,5 @@
 {
-  "id": "16012c7a-f7c2-4bcd-aa76-20f907f94302",
+  "id": "e206d423-7555-483c-aa60-440bc248f765",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -112,6 +112,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'faculty'"
+        },
+        "designation": {
+          "name": "designation",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'lecturer'"
         },
         "created_at": {
           "name": "created_at",

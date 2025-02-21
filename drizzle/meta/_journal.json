@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1738749285314,
-      "tag": "0000_closed_leper_queen",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1738812272387,
-      "tag": "0001_complex_sentinels",
+      "when": 1740118700411,
+      "tag": "0000_shiny_shen",
       "breakpoints": true
     }
   ]

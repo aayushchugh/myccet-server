@@ -13,6 +13,7 @@ CREATE TABLE "user" (
 	"password" varchar(255) NOT NULL,
 	"phone" integer NOT NULL,
 	"role" varchar(255) DEFAULT 'faculty' NOT NULL,
+	"designation" varchar(255) DEFAULT 'lecturer' NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "user_email_unique" UNIQUE("email"),
