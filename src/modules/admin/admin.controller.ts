@@ -5,77 +5,98 @@ import bcryptjs from "bcryptjs";
 import logger from "../../libs/logger";
 import db from "../../db";
 import { userTable, Role } from "../../db/schema/user";
+import { eq } from "drizzle-orm";
 
 export async function postAdminHandler(
-	req: Request<{}, {}, PostAdminBody>,
-	res: Response
+  req: Request<{}, {}, PostAdminBody>,
+  res: Response,
 ) {
-	try {
-		const {
-			email,
-			password,
-			first_name,
-			middle_name,
-			last_name,
-			phone,
-			designation,
-		} = req.body;
+  try {
+    const {
+      email,
+      password,
+      first_name,
+      middle_name,
+      last_name,
+      phone,
+      designation,
+    } = req.body;
 
-		// Hash password
-		const salt = await bcryptjs.genSalt(10);
-		const hashedPassword = await bcryptjs.hash(password, salt);
+    // Hash password
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
 
-		// Create new admin account
-		await db.insert(userTable).values({
-			email,
-			first_name,
-			last_name,
-			middle_name,
-			phone,
-			password: hashedPassword,
-			role: Role.ADMIN,
-			designation,
-			created_at: new Date(),
-			updated_at: new Date(),
-		});
+    // Create new admin account
+    await db.insert(userTable).values({
+      email,
+      first_name,
+      last_name,
+      middle_name,
+      phone,
+      password: hashedPassword,
+      role: Role.ADMIN,
+      designation,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
 
-		logger.info(
-			`Admin account created with email: ${email} by ${req.user?.id}`,
-			"ADMIN"
-		);
+    logger.info(
+      `Admin account created with email: ${email} by ${req.user?.id}`,
+      "ADMIN",
+    );
 
-		res.status(StatusCodes.CREATED).json({
-			message: "account created successfully",
-		});
+    res.status(StatusCodes.CREATED).json({
+      message: "account created successfully",
+    });
 
-		return;
-	} catch (err: any) {
-		console.error(err);
+    return;
+  } catch (err: any) {
+    console.error(err);
 
-		if (err.code === "23505") {
-			if (err.constraint === "user_email_unique") {
-				res.status(StatusCodes.CONFLICT).json({
-					errors: {
-						email: "account with same email already exists",
-					},
-				});
+    if (err.code === "23505") {
+      if (err.constraint === "user_email_unique") {
+        res.status(StatusCodes.CONFLICT).json({
+          errors: {
+            email: "account with same email already exists",
+          },
+        });
 
-				return;
-			}
+        return;
+      }
 
-			if (err.constraint === "user_phone_unique") {
-				res.status(StatusCodes.CONFLICT).json({
-					errors: {
-						phone: "account with same phone already exists",
-					},
-				});
+      if (err.constraint === "user_phone_unique") {
+        res.status(StatusCodes.CONFLICT).json({
+          errors: {
+            phone: "account with same phone already exists",
+          },
+        });
 
-				return;
-			}
-		}
+        return;
+      }
+    }
 
-		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-			message: "Internal server error",
-		});
-	}
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function getAllAdminsHandler(req: Request, res: Response) {
+  try {
+    const admins = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.role, Role.ADMIN));
+
+    res.status(StatusCodes.OK).json({
+      message: "admins fetched successfully",
+      payload: admins,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
 }
