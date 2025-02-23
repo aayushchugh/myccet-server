@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { PostAdminBody } from "./admin.schema";
+import { PostAdminBody, PutAdminBody } from "./admin.schema";
 import bcryptjs from "bcryptjs";
 import logger from "../../libs/logger";
 import db from "../../db";
@@ -127,6 +127,87 @@ export async function deleteAdminHandler(
     });
   } catch (err) {
     console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function putAdminHandler(
+  req: Request<{ id: string }, {}, PutAdminBody>,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+    const { email, first_name, middle_name, last_name, designation, phone } =
+      req.body;
+
+    // Update the admin account, setting the new fields along with the updated_at timestamp.
+    const updateResult = await db
+      .update(userTable)
+      .set({
+        email,
+        first_name,
+        middle_name,
+        last_name,
+        phone,
+        designation,
+        updated_at: new Date(),
+      })
+      .where(
+        and(
+          eq(userTable.id, parseInt(id)),
+          eq(userTable.role, Role.ADMIN),
+          isNull(userTable.deleted_at),
+        ),
+      )
+      .returning({
+        id: userTable.id,
+        email: userTable.email,
+        first_name: userTable.first_name,
+        middle_name: userTable.middle_name,
+        last_name: userTable.last_name,
+        phone: userTable.phone,
+        designation: userTable.designation,
+      });
+
+    // If no record is updated, then no matching admin was found.
+    if (updateResult.length === 0) {
+      res.status(StatusCodes.NOT_FOUND).json({ message: "Admin not found" });
+
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({
+      message: "Admin updated successfully",
+      payload: updateResult[0],
+    });
+  } catch (err: any) {
+    console.error(err);
+
+    // Handle unique constraint errors for email and phone as done in the POST handler.
+    if (err.code === "23505") {
+      if (err.constraint === "user_email_unique") {
+        res.status(StatusCodes.CONFLICT).json({
+          errors: {
+            email: "account with same email already exists",
+          },
+        });
+
+        return;
+      }
+
+      if (err.constraint === "user_phone_unique") {
+        res.status(StatusCodes.CONFLICT).json({
+          errors: {
+            phone: "account with same phone already exists",
+          },
+        });
+
+        return;
+      }
+    }
 
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: "Internal server error",

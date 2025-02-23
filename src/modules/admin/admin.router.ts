@@ -5,6 +5,7 @@ import {
   deleteAdminHandler,
   getAllAdminsHandler,
   postAdminHandler,
+  putAdminHandler,
 } from "./admin.controller";
 import { validateRequestBody } from "../../middlewares/validate-request.middleware";
 import { postAdminBodySchema } from "./admin.schema";
@@ -18,10 +19,7 @@ adminRouter.post(
   postAdminHandler,
 );
 
-adminRouter.get("/", requireRoleMiddleware(Role.ADMIN), getAllAdminsHandler);
-adminRouter.delete(
-  "/:id/",
-  requireRoleMiddleware(Role.ADMIN),
-  deleteAdminHandler,
-);
+adminRouter.get("/", getAllAdminsHandler);
+adminRouter.route("/:id/").delete(deleteAdminHandler).put(putAdminHandler);
+
 export default adminRouter;

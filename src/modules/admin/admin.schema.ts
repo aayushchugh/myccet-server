@@ -35,3 +35,20 @@ export const postAdminBodySchema = z.object({
 });
 
 export type PostAdminBody = z.infer<typeof postAdminBodySchema>;
+
+export const putAdminBodySchema = z.object({
+  email: z.string().email({ message: "please enter a valid email" }).optional(),
+  first_name: z.string().optional(),
+  middle_name: z.string().optional(),
+  last_name: z.string().optional(),
+  phone: z
+    .number()
+    .min(1000000000, { message: "phone number should be at least 10 digits" })
+    .max(9999999999, { message: "phone number should be at least 10 digits" })
+    .optional(),
+  designation: z
+    .enum([Designation.HOD, Designation.LECTURER, Designation.Maintenance])
+    .optional(),
+});
+
+export type PutAdminBody = z.infer<typeof putAdminBodySchema>;

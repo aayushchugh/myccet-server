@@ -8,14 +8,16 @@ import cookieParser from "cookie-parser";
 import { requireLoginMiddleware } from "./middlewares/require-login.middleware";
 import adminRouter from "./modules/admin/admin.router";
 import { requestLoggerMiddleware } from "./middlewares/request-logger.middleware";
+import { requireRoleMiddleware } from "./middlewares/require-role.middleware";
+import { Role } from "./db/schema/user";
 
 const app = express();
 
 app.use(
-	cors({
-		credentials: true,
-		origin: ["http://localhost:3000", "https://myccet.infyfix.com"],
-	})
+  cors({
+    credentials: true,
+    origin: ["http://localhost:3000", "https://myccet.infyfix.com"],
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -27,12 +29,12 @@ app.use("/auth", authRouter);
 
 // Only allow logged in users to access the following routes
 app.use(requireLoginMiddleware);
-app.use("/admin", adminRouter);
+app.use("/admin", requireRoleMiddleware(Role.ADMIN), adminRouter);
 
 const PORT = process.env.PORT || 8000;
 
 (async () => {
-	app.listen(PORT, () => {
-		logger.info(`Server is running on port ${PORT}`, "SYSTEM");
-	});
+  app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`, "SYSTEM");
+  });
 })();
