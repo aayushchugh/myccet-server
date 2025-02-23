@@ -5,7 +5,7 @@ import bcryptjs from "bcryptjs";
 import logger from "../../libs/logger";
 import db from "../../db";
 import { userTable, Role } from "../../db/schema/user";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 export async function postAdminHandler(
   req: Request<{}, {}, PostAdminBody>,
@@ -94,11 +94,36 @@ export async function getAllAdminsHandler(req: Request, res: Response) {
         designation: userTable.designation,
       })
       .from(userTable)
-      .where(eq(userTable.role, Role.ADMIN));
+      .where(and(eq(userTable.role, Role.ADMIN), isNull(userTable.deleted_at)));
 
     res.status(StatusCodes.OK).json({
       message: "admins fetched successfully",
       payload: admins,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function deleteAdminHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+    console.log(id);
+
+    await db
+      .update(userTable)
+      .set({ deleted_at: new Date() })
+      .where(eq(userTable.id, parseInt(id)));
+
+    res.status(StatusCodes.OK).json({
+      message: "admin deleted successfully",
     });
   } catch (err) {
     console.error(err);

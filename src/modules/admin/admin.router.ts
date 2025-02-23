@@ -1,7 +1,11 @@
 import { Router } from "express";
 import { requireRoleMiddleware } from "../../middlewares/require-role.middleware";
 import { Role } from "../../db/schema/user";
-import { getAllAdminsHandler, postAdminHandler } from "./admin.controller";
+import {
+  deleteAdminHandler,
+  getAllAdminsHandler,
+  postAdminHandler,
+} from "./admin.controller";
 import { validateRequestBody } from "../../middlewares/validate-request.middleware";
 import { postAdminBodySchema } from "./admin.schema";
 
@@ -15,5 +19,9 @@ adminRouter.post(
 );
 
 adminRouter.get("/", requireRoleMiddleware(Role.ADMIN), getAllAdminsHandler);
-
+adminRouter.delete(
+  "/:id/",
+  requireRoleMiddleware(Role.ADMIN),
+  deleteAdminHandler,
+);
 export default adminRouter;
