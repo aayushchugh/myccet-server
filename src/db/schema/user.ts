@@ -1,5 +1,11 @@
 import { InferSelectModel, sql } from "drizzle-orm";
-import { integer, pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgTable,
+  varchar,
+  timestamp,
+  bigint,
+} from "drizzle-orm/pg-core";
 
 export enum Role {
   ADMIN = "admin",
@@ -19,7 +25,11 @@ export const userTable = pgTable("user", {
   last_name: varchar({ length: 255 }),
   email: varchar({ length: 255 }).notNull().unique(),
   password: varchar({ length: 255 }).notNull(),
-  phone: integer().unique().notNull(),
+  phone: bigint({
+    mode: "bigint",
+  })
+    .unique()
+    .notNull(),
   role: varchar({ length: 255 }).notNull().default("faculty"),
   designation: varchar({ length: 255 }).notNull().default("lecturer"),
   created_at: timestamp({ mode: "date" }).defaultNow(),
