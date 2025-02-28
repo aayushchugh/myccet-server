@@ -26,7 +26,7 @@ export const userTable = pgTable("user", {
   email: varchar({ length: 255 }).notNull().unique(),
   password: varchar({ length: 255 }).notNull(),
   phone: bigint({
-    mode: "bigint",
+    mode: "number",
   })
     .unique()
     .notNull(),
