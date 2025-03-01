@@ -3,6 +3,7 @@ import { requireRoleMiddleware } from "@/middlewares/require-role.middleware";
 import { Router } from "express";
 import {
   getAllSubjectsHandler,
+  getSubjectHandler,
   postCreateSubjectHandler,
 } from "./subject.controller";
 import { validateRequestBody } from "@/middlewares/validate-request.middleware";
@@ -18,5 +19,6 @@ subjectRouter.post(
 );
 
 subjectRouter.get("/", getAllSubjectsHandler);
+subjectRouter.get("/:code", getSubjectHandler);
 
 export default subjectRouter;
