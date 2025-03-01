@@ -2,6 +2,7 @@ import { Role } from "@/db/schema/user";
 import { requireRoleMiddleware } from "@/middlewares/require-role.middleware";
 import { Router } from "express";
 import {
+  deleteSubjectHandler,
   getAllSubjectsHandler,
   getSubjectHandler,
   postCreateSubjectHandler,
@@ -20,5 +21,6 @@ subjectRouter.post(
 
 subjectRouter.get("/", getAllSubjectsHandler);
 subjectRouter.get("/:code", getSubjectHandler);
+subjectRouter.delete("/:code", deleteSubjectHandler);
 
 export default subjectRouter;

@@ -12,6 +12,30 @@ export async function postCreateSubjectHandler(
   try {
     const { code, title } = req.body;
 
+    // Get existing subject
+    const [existingSubject] = await db
+      .select()
+      .from(subjectTable)
+      .where(eq(subjectTable.code, code));
+
+    // Check if existing subject has deleted_at
+    if (existingSubject.deleted_at) {
+      // Update existing subject to be active
+      await db
+        .update(subjectTable)
+        .set({
+          title,
+          deleted_at: null,
+        })
+        .where(eq(subjectTable.code, code));
+
+      res.json({
+        message: "Subject created successfully",
+      });
+
+      return;
+    }
+
     // Create new subject in database
     await db.insert(subjectTable).values({
       code,
@@ -88,6 +112,32 @@ export async function getSubjectHandler(
     res.json({
       message: "Subject fetched successfully",
       payload: subject[0],
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function deleteSubjectHandler(
+  req: Request<{ code: string }>,
+  res: Response,
+) {
+  try {
+    const { code } = req.params;
+
+    await db
+      .update(subjectTable)
+      .set({
+        deleted_at: new Date(),
+      })
+      .where(eq(subjectTable.code, code));
+
+    res.json({
+      message: "Subject deleted successfully",
     });
   } catch (err) {
     console.error(err);
