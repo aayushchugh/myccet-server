@@ -19,7 +19,7 @@ export async function postCreateSubjectHandler(
       .where(eq(subjectTable.code, code));
 
     // Check if existing subject has deleted_at
-    if (existingSubject.deleted_at) {
+    if (existingSubject && existingSubject.deleted_at) {
       // Update existing subject to be active
       await db
         .update(subjectTable)
