@@ -7,127 +7,126 @@ import db from "../../db";
 import { eq } from "drizzle-orm";
 import logger from "../../libs/logger";
 import { createSession, generateSessionToken } from "./auth.service";
-import { error } from "winston";
 
 export async function postSignupHandler(
-	req: Request<{}, {}, PostSignupBody>,
-	res: Response
+  req: Request<{}, {}, PostSignupBody>,
+  res: Response,
 ) {
-	try {
-		const {
-			email,
-			password,
-			first_name,
-			last_name,
-			middle_name,
-			phone,
-			role,
-			designation,
-		} = req.body;
+  try {
+    const {
+      email,
+      password,
+      first_name,
+      last_name,
+      middle_name,
+      phone,
+      role,
+      designation,
+    } = req.body;
 
-		// Check if admin already exists
-		const admins = await db
-			.select()
-			.from(userTable)
-			.where(eq(userTable.role, "admin"));
+    // Check if admin already exists
+    const admins = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.role, "admin"));
 
-		if (admins.length) {
-			res.status(StatusCodes.FORBIDDEN).json({
-				message: "admin account already exists",
-			});
+    if (admins.length) {
+      res.status(StatusCodes.FORBIDDEN).json({
+        message: "admin account already exists",
+      });
 
-			return;
-		}
+      return;
+    }
 
-		const salt = await bcryptjs.genSalt(10);
-		const hashedPassword = await bcryptjs.hash(password, salt);
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
 
-		// Create new admin account
-		await db.insert(userTable).values({
-			email,
-			first_name,
-			last_name,
-			middle_name,
-			phone,
-			password: hashedPassword,
-			role,
-			designation,
-			created_at: new Date(),
-			updated_at: new Date(),
-		});
+    // Create new admin account
+    await db.insert(userTable).values({
+      email,
+      first_name,
+      last_name,
+      middle_name,
+      phone,
+      password: hashedPassword,
+      role,
+      designation,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
 
-		logger.info(`Admin account created with email: ${email}`, "AUTH");
+    logger.info(`Admin account created with email: ${email}`, "AUTH");
 
-		res.status(StatusCodes.CREATED).json({
-			message: "account created successfully",
-		});
+    res.status(StatusCodes.CREATED).json({
+      message: "account created successfully",
+    });
 
-		return;
-	} catch (err) {
-		console.error(err);
+    return;
+  } catch (err) {
+    console.error(err);
 
-		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-			message: "Internal server error",
-		});
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
 
-		return;
-	}
+    return;
+  }
 }
 
 export async function postLoginHandler(
-	req: Request<{}, {}, PostLoginBody>,
-	res: Response
+  req: Request<{}, {}, PostLoginBody>,
+  res: Response,
 ) {
-	try {
-		const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-		const user = await db
-			.select()
-			.from(userTable)
-			.where(eq(userTable.email, email));
+    const user = await db
+      .select()
+      .from(userTable)
+      .where(eq(userTable.email, email));
 
-		if (!user.length) {
-			res.status(StatusCodes.NOT_FOUND).json({
-				message: "user not found",
-				errors: [{ email: "user not found" }],
-			});
+    if (!user.length) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "user not found",
+        errors: [{ email: "user not found" }],
+      });
 
-			return;
-		}
+      return;
+    }
 
-		const isValid = await bcryptjs.compare(password, user[0].password);
+    const isValid = await bcryptjs.compare(password, user[0].password);
 
-		if (!isValid) {
-			res.status(StatusCodes.UNAUTHORIZED).json({
-				message: "invalid password",
-				errors: [{ password: "invalid password" }],
-			});
+    if (!isValid) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "invalid password",
+        errors: [{ password: "invalid password" }],
+      });
 
-			return;
-		}
+      return;
+    }
 
-		// Create session
-		const sessionToken = generateSessionToken();
-		await createSession(sessionToken, user[0].id);
+    // Create session
+    const sessionToken = generateSessionToken();
+    await createSession(sessionToken, user[0].id);
 
-		logger.info(`User logged in with email: ${email}`, "AUTH");
+    logger.info(`User logged in with email: ${email}`, "AUTH");
 
-		// set session in cookie
-		res.status(StatusCodes.OK).json({
-			message: "login successful",
-			payload: {
-				access_token: sessionToken,
-			},
-		});
+    // set session in cookie
+    res.status(StatusCodes.OK).json({
+      message: "login successful",
+      payload: {
+        access_token: sessionToken,
+      },
+    });
 
-		return;
-	} catch (err) {
-		console.error(err);
+    return;
+  } catch (err) {
+    console.error(err);
 
-		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-			message: "Internal server error",
-		});
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
 
-		return;
-	}
+    return;
+  }
 }

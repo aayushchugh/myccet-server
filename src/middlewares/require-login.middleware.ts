@@ -5,55 +5,55 @@ import { Session } from "../db/schema/session";
 import { User } from "../db/schema/user";
 
 declare module "express-serve-static-core" {
-	interface Request {
-		session?: Session;
-		user?: User;
-	}
+  interface Request {
+    session?: Session;
+    user?: User;
+  }
 }
 
 export async function requireLoginMiddleware(
-	req: Request,
-	res: Response,
-	next: NextFunction
+  req: Request,
+  res: Response,
+  next: NextFunction,
 ) {
-	try {
-		// get session from cookie
-		const authHeader = req.headers.authorization;
-		if (!authHeader || !authHeader.startsWith("Bearer ")) {
-			res.status(StatusCodes.UNAUTHORIZED).json({
-				message: "user must be logged in to access this route",
-			});
-			return;
-		}
-		const sessionToken = authHeader.split(" ")[1];
+  try {
+    // get session from cookie
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "user must be logged in to access this route",
+      });
+      return;
+    }
+    const sessionToken = authHeader.split(" ")[1];
 
-		if (!sessionToken) {
-			res.status(StatusCodes.UNAUTHORIZED).json({
-				message: "user must be logged in to access this route",
-			});
-			return;
-		}
+    if (!sessionToken) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "user must be logged in to access this route",
+      });
+      return;
+    }
 
-		// verify session
-		const { session, user } = await validateSessionToken(sessionToken);
+    // verify session
+    const { session, user } = await validateSessionToken(sessionToken);
 
-		if (!session || !user) {
-			res.status(StatusCodes.UNAUTHORIZED).json({
-				message: "user must be logged in to access this route",
-			});
+    if (!session || !user) {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        message: "user must be logged in to access this route",
+      });
 
-			return;
-		}
+      return;
+    }
 
-		req.session = session;
-		req.user = user;
+    req.session = session;
+    req.user = user;
 
-		next();
-	} catch (err) {
-		console.error(err);
+    next();
+  } catch (err) {
+    console.error(err);
 
-		res.status(StatusCodes.UNAUTHORIZED).json({
-			message: "user must be logged in to access this route",
-		});
-	}
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      message: "user must be logged in to access this route",
+    });
+  }
 }
