@@ -26,13 +26,15 @@ export async function postCreateSubjectHandler(
     console.error(err);
 
     if (err.code === "23505") {
-      return res.status(StatusCodes.CONFLICT).json({j
+      res.status(StatusCodes.CONFLICT).json({
         errors: {
           code: {
             message: "Subject with same code already exists",
           },
         },
       });
+
+      return;
     }
 
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
