@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { PostCreateSubjectBody } from "./subject.schema";
+import { PostCreateSubjectBody, PutUpdateSubjectBody } from "./subject.schema";
 import db from "@/db";
 import { subjectTable } from "@/db/schema/subject";
 import { eq } from "drizzle-orm";
@@ -113,6 +113,36 @@ export async function getSubjectHandler(
       message: "Subject fetched successfully",
       payload: subject[0],
     });
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+export async function putSubjectHandler(
+  req: Request<{ code: string }, {}, PutUpdateSubjectBody>,
+  res: Response,
+) {
+  try {
+    const { code } = req.params;
+    const { code: newCode, title } = req.body;
+
+    await db
+      .update(subjectTable)
+      .set({
+        code: newCode,
+        title,
+      })
+      .where(eq(subjectTable.code, code));
+
+    res.status(StatusCodes.OK).json({
+      message: "Subject updated successfully",
+    });
+
+    return;
   } catch (err) {
     console.error(err);
 

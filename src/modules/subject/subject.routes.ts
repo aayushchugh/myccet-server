@@ -6,6 +6,7 @@ import {
   getAllSubjectsHandler,
   getSubjectHandler,
   postCreateSubjectHandler,
+  putSubjectHandler,
 } from "./subject.controller";
 import { validateRequestBody } from "@/middlewares/validate-request.middleware";
 import { postCreateSubjectSchema } from "./subject.schema";
@@ -21,6 +22,11 @@ subjectRouter.post(
 
 subjectRouter.get("/", getAllSubjectsHandler);
 subjectRouter.get("/:code", getSubjectHandler);
+subjectRouter.put(
+  "/:code",
+  requireRoleMiddleware(Role.ADMIN),
+  putSubjectHandler,
+);
 subjectRouter.delete("/:code", deleteSubjectHandler);
 
 export default subjectRouter;

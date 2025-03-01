@@ -6,3 +6,10 @@ export const postCreateSubjectSchema = z.object({
 });
 
 export type PostCreateSubjectBody = z.infer<typeof postCreateSubjectSchema>;
+
+export const putUpdateSubjectSchema = z.object({
+  title: z.string().optional(),
+  code: z.string().optional(),
+});
+
+export type PutUpdateSubjectBody = z.infer<typeof putUpdateSubjectSchema>;
