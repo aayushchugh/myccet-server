@@ -44,3 +44,22 @@ export async function postCreateSubjectHandler(
     return;
   }
 }
+
+export async function getAllSubjectsHandler(req: Request, res: Response) {
+  try {
+    const subjects = await db
+      .select({ code: subjectTable.code, title: subjectTable.title })
+      .from(subjectTable);
+
+    res.json({
+      message: "Subjects fetched successfully",
+      payload: subjects,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+  }
+}
