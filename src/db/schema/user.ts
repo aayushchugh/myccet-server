@@ -10,12 +10,15 @@ import {
 export enum Role {
   ADMIN = "admin",
   FACULTY = "faculty",
+  STUDENT = "student",
 }
 
 export enum Designation {
   HOD = "hod",
   LECTURER = "lecturer",
   Maintenance = "maintenance",
+  Principal = "principal",
+  Tutor = "tutor",
 }
 
 export const userTable = pgTable("user", {

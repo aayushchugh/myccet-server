@@ -28,11 +28,7 @@ export const postSignupBodySchema = z.object({
     .min(1000000000, { message: "phone number should be at least 10 digits" })
     .max(9999999999, { message: "phone number should be at least 10 digits" }),
   role: z.enum([Role.ADMIN, Role.FACULTY]),
-  designation: z.enum([
-    Designation.HOD,
-    Designation.LECTURER,
-    Designation.Maintenance,
-  ]),
+  designation: z.enum([Designation.Maintenance, Designation.Principal]),
 });
 export type PostSignupBody = z.infer<typeof postSignupBodySchema>;
 
