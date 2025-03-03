@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { PostLoginBody, PostSignupBody } from "./auth.schema";
-import { userTable } from "../../db/schema/user";
+import { User, userTable } from "../../db/schema/user";
 import bcryptjs from "bcryptjs";
 import db from "../../db";
 import { eq } from "drizzle-orm";
@@ -116,6 +116,43 @@ export async function postLoginHandler(
       message: "login successful",
       payload: {
         access_token: sessionToken,
+      },
+    });
+
+    return;
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+
+    return;
+  }
+}
+
+export function getCurrentUserHandler(req: Request, res: Response) {
+  try {
+    const {
+      id,
+      email,
+      first_name,
+      last_name,
+      middle_name,
+      phone,
+      designation,
+    } = req.user as User;
+
+    res.status(StatusCodes.OK).json({
+      message: "user found",
+      payload: {
+        id,
+        email,
+        first_name,
+        last_name,
+        middle_name,
+        phone,
+        designation,
       },
     });
 
