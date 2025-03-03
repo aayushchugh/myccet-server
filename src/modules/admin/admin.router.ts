@@ -3,6 +3,7 @@ import { requireRoleMiddleware } from "../../middlewares/require-role.middleware
 import { Role } from "../../db/schema/user";
 import {
   deleteAdminHandler,
+  getAdminHandler,
   getAllAdminsHandler,
   postAdminHandler,
   putAdminHandler,
@@ -20,6 +21,10 @@ adminRouter.post(
 );
 
 adminRouter.get("/", getAllAdminsHandler);
-adminRouter.route("/:id/").delete(deleteAdminHandler).put(putAdminHandler);
+adminRouter
+  .route("/:id/")
+  .get(getAdminHandler)
+  .delete(deleteAdminHandler)
+  .put(putAdminHandler);
 
 export default adminRouter;

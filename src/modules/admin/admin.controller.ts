@@ -109,6 +109,51 @@ export async function getAllAdminsHandler(req: Request, res: Response) {
   }
 }
 
+export async function getAdminHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+
+    const [admin] = await db
+      .select({
+        id: userTable.id,
+        email: userTable.email,
+        first_name: userTable.first_name,
+        middle_name: userTable.middle_name,
+        last_name: userTable.last_name,
+        phone: userTable.phone,
+        designation: userTable.designation,
+      })
+      .from(userTable)
+      .where(eq(userTable.id, +id));
+
+    if (!admin) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "Admin not found",
+      });
+
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({
+      message: "Admin fetched successfully",
+      payload: admin,
+    });
+
+    return;
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+    });
+
+    return;
+  }
+}
+
 export async function deleteAdminHandler(
   req: Request<{ id: string }>,
   res: Response,
