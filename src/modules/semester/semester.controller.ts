@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { PostCreateSemesterBody } from "./semester.schema";
 import db from "@/db";
 import { semesterTable } from "@/db/schema/semester";
-import { isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 export async function postCreateSemesterHandler(
   req: Request<{}, {}, PostCreateSemesterBody>,
@@ -50,6 +50,48 @@ export async function getAllSemesterHandler(req: Request, res: Response) {
     res.status(StatusCodes.OK).json({
       message: "semesters fetched successfully",
       payload: semesters,
+    });
+
+    return;
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal Server Error",
+    });
+
+    return;
+  }
+}
+
+export async function getSingleSemesterHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+
+    const [semster] = await db
+      .select({
+        id: semesterTable.id,
+        title: semesterTable.title,
+        start_date: semesterTable.start_date,
+        end_date: semesterTable.end_date,
+      })
+      .from(semesterTable)
+      .where(and(eq(semesterTable.id, +id), isNull(semesterTable.deleted_at)));
+
+    if (!semster) {
+      res.status(StatusCodes.NOT_FOUND).json({
+        message: "Semester not found",
+      });
+
+      return;
+    }
+
+    res.status(StatusCodes.OK).json({
+      message: "Semester fetched successfully",
+      payload: semster,
     });
 
     return;

@@ -5,6 +5,7 @@ import { Router } from "express";
 import { postCreateSemesterSchema } from "./semester.schema";
 import {
   getAllSemesterHandler,
+  getSingleSemesterHandler,
   postCreateSemesterHandler,
 } from "./semester.controller";
 
@@ -18,5 +19,7 @@ semesterRouter
     postCreateSemesterHandler,
   )
   .get(getAllSemesterHandler);
+
+semesterRouter.route("/:id").get(getSingleSemesterHandler);
 
 export default semesterRouter;
