@@ -12,6 +12,7 @@ import { requireRoleMiddleware } from "./middlewares/require-role.middleware";
 import { Role } from "./db/schema/user";
 import subjectRouter from "./modules/subject/subject.routes";
 import semesterRouter from "./modules/semester/semester.routes";
+import branchRouter from "./modules/branch/branch.routes";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use(requireLoginMiddleware);
 app.use("/admin", requireRoleMiddleware(Role.ADMIN), adminRouter);
 app.use("/subjects", subjectRouter);
 app.use("/semesters", semesterRouter);
+app.use("/branches", branchRouter);
 
 const PORT = process.env.PORT || 8000;
 
