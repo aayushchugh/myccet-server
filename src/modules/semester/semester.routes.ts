@@ -2,12 +2,16 @@ import { Role } from "@/db/schema/user";
 import { requireRoleMiddleware } from "@/middlewares/require-role.middleware";
 import { validateRequestBody } from "@/middlewares/validate-request.middleware";
 import { Router } from "express";
-import { postCreateSemesterSchema } from "./semester.schema";
+import {
+  postCreateSemesterSchema,
+  putUpdateSemesterSchema,
+} from "./semester.schema";
 import {
   deleteSemesterHandler,
   getAllSemesterHandler,
   getSingleSemesterHandler,
   postCreateSemesterHandler,
+  putSemesterHandler,
 } from "./semester.controller";
 
 const semesterRouter = Router();
@@ -24,6 +28,11 @@ semesterRouter
 semesterRouter
   .route("/:id")
   .get(getSingleSemesterHandler)
+  .put(
+    requireRoleMiddleware(Role.ADMIN),
+    validateRequestBody(putUpdateSemesterSchema),
+    putSemesterHandler,
+  )
   .delete(requireRoleMiddleware(Role.ADMIN), deleteSemesterHandler);
 
 export default semesterRouter;

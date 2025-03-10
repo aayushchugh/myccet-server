@@ -7,3 +7,11 @@ export const postCreateSemesterSchema = z.object({
 });
 
 export type PostCreateSemesterBody = z.infer<typeof postCreateSemesterSchema>;
+
+export const putUpdateSemesterSchema = z.object({
+  title: z.string().optional(),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
+});
+
+export type PutUpdateSemesterBody = z.infer<typeof putUpdateSemesterSchema>;

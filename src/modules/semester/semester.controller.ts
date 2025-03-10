@@ -1,6 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import { Request, Response } from "express";
-import { PostCreateSemesterBody } from "./semester.schema";
+import {
+  PostCreateSemesterBody,
+  PutUpdateSemesterBody,
+} from "./semester.schema";
 import db from "@/db";
 import { semesterTable } from "@/db/schema/semester";
 import { and, eq, isNull } from "drizzle-orm";
@@ -92,6 +95,35 @@ export async function getSingleSemesterHandler(
     res.status(StatusCodes.OK).json({
       message: "Semester fetched successfully",
       payload: semster,
+    });
+
+    return;
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal Server Error",
+    });
+
+    return;
+  }
+}
+
+export async function putSemesterHandler(
+  req: Request<{}, {}, PutUpdateSemesterBody>,
+  res: Response,
+) {
+  try {
+    const { title, start_date, end_date } = req.body;
+
+    await db.update(semesterTable).set({
+      title,
+      ...(start_date ? { start_date: new Date(start_date) } : {}),
+      ...(end_date ? { end_date: new Date(end_date) } : {}),
+    });
+
+    res.status(StatusCodes.OK).json({
+      message: "Semester updated successfully",
     });
 
     return;
