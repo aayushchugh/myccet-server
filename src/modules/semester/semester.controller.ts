@@ -105,3 +105,31 @@ export async function getSingleSemesterHandler(
     return;
   }
 }
+
+export async function deleteSemesterHandler(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  try {
+    const { id } = req.params;
+
+    await db
+      .update(semesterTable)
+      .set({ deleted_at: new Date() })
+      .where(eq(semesterTable.id, +id));
+
+    res.status(StatusCodes.OK).json({
+      message: "Semester deleted successfully",
+    });
+
+    return;
+  } catch (err) {
+    console.error(err);
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal Server Error",
+    });
+
+    return;
+  }
+}

@@ -4,6 +4,7 @@ import { validateRequestBody } from "@/middlewares/validate-request.middleware";
 import { Router } from "express";
 import { postCreateSemesterSchema } from "./semester.schema";
 import {
+  deleteSemesterHandler,
   getAllSemesterHandler,
   getSingleSemesterHandler,
   postCreateSemesterHandler,
@@ -20,6 +21,9 @@ semesterRouter
   )
   .get(getAllSemesterHandler);
 
-semesterRouter.route("/:id").get(getSingleSemesterHandler);
+semesterRouter
+  .route("/:id")
+  .get(getSingleSemesterHandler)
+  .delete(requireRoleMiddleware(Role.ADMIN), deleteSemesterHandler);
 
 export default semesterRouter;
