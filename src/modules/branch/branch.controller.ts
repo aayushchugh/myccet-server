@@ -26,7 +26,7 @@ export async function postCreateBranchHandler(
 			if (err.constraint === "branch_title_unique") {
 				res.status(StatusCodes.CONFLICT).json({
 					errors: {
-						email: "Branch with same Title already exists",
+						branch: "Branch with same Title already exists",
 					},
 				});
 
@@ -124,15 +124,27 @@ export async function putBranchHandler(
 			message: "Branch updated successfully",
 		});
 		return;
-	} catch (err) {
+	} catch (err: any) {
 		console.error(err);
+
+		// Handle unique constraint errors for email and phone as done in the POST handler.
+		if (err.code === "23505") {
+			if (err.constraint === "branch_code_unique") {
+				res.status(StatusCodes.CONFLICT).json({
+					errors: {
+						branch: "Branch with same Code already exists",
+					},
+				});
+
+				return;
+			}
+		}
+
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-			message: "Internal Server Error",
+			message: "Internal server error",
 		});
-		return;
 	}
 }
-
 export async function deleteBranchHandler(
 	req: Request<{ id: string }>,
 	res: Response

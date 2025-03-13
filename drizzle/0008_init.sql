@@ -1,0 +1,1 @@
+ALTER TABLE "branch" ADD CONSTRAINT "branch_title_unique" UNIQUE("title");
