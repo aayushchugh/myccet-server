@@ -129,10 +129,10 @@ export async function putBranchHandler(
 
 		// Handle unique constraint errors for email and phone as done in the POST handler.
 		if (err.code === "23505") {
-			if (err.constraint === "branch_code_unique") {
+			if (err.constraint === "branch_title_unique") {
 				res.status(StatusCodes.CONFLICT).json({
 					errors: {
-						branch: "Branch with same Code already exists",
+						branch: "Branch with same title already exists",
 					},
 				});
 
