@@ -10,7 +10,7 @@ import { and, eq, isNull } from "drizzle-orm";
 
 export async function postCreateSemesterHandler(
   req: Request<{}, {}, PostCreateSemesterBody>,
-  res: Response,
+  res: Response
 ) {
   try {
     const { title, start_date, end_date } = req.body;
@@ -69,7 +69,7 @@ export async function getAllSemesterHandler(req: Request, res: Response) {
 
 export async function getSingleSemesterHandler(
   req: Request<{ id: string }>,
-  res: Response,
+  res: Response
 ) {
   try {
     const { id } = req.params;
@@ -111,7 +111,7 @@ export async function getSingleSemesterHandler(
 
 export async function putSemesterHandler(
   req: Request<{}, {}, PutUpdateSemesterBody>,
-  res: Response,
+  res: Response
 ) {
   try {
     const { title, start_date, end_date } = req.body;
@@ -140,7 +140,7 @@ export async function putSemesterHandler(
 
 export async function deleteSemesterHandler(
   req: Request<{ id: string }>,
-  res: Response,
+  res: Response
 ) {
   try {
     const { id } = req.params;
