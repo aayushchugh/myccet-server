@@ -10,7 +10,7 @@ import { and, eq, isNull } from "drizzle-orm";
 export async function postFacultyHandler(
   req: Request<{}, {}, PostFacultyBody>,
   res: Response
-) {
+): Promise<void> {
   try {
     const {
       email,
@@ -32,9 +32,9 @@ export async function postFacultyHandler(
       first_name,
       last_name,
       middle_name,
-      phone,
+      phone: Number(phone),
       password: hashedPassword,
-      role: Role.FACULTY,
+      role: Role.ADMIN,
       designation,
       created_at: new Date(),
       updated_at: new Date(),
@@ -51,14 +51,16 @@ export async function postFacultyHandler(
 
     if (err.code === "23505") {
       if (err.constraint === "user_email_unique") {
-        return res.status(StatusCodes.CONFLICT).json({
+        res.status(StatusCodes.CONFLICT).json({
           errors: { email: "Account with same email already exists" },
         });
+        return;
       }
       if (err.constraint === "user_phone_unique") {
-        return res.status(StatusCodes.CONFLICT).json({
+        res.status(StatusCodes.CONFLICT).json({
           errors: { phone: "Account with same phone already exists" },
         });
+        return;
       }
     }
 
@@ -84,6 +86,7 @@ export async function getAllFacultyHandler(req: Request, res: Response) {
       .where(
         and(eq(userTable.role, Role.FACULTY), isNull(userTable.deleted_at))
       );
+    console.log("Faculty Data:", faculty);
 
     res.status(StatusCodes.OK).json({
       message: "Faculty members fetched successfully",
@@ -101,7 +104,7 @@ export async function getAllFacultyHandler(req: Request, res: Response) {
 export async function getFacultyHandler(
   req: Request<{ id: string }>,
   res: Response
-) {
+): Promise<void> {
   try {
     const { id } = req.params;
 
@@ -119,9 +122,10 @@ export async function getFacultyHandler(
       .where(eq(userTable.id, +id));
 
     if (!faculty) {
-      return res.status(StatusCodes.NOT_FOUND).json({
+      res.status(StatusCodes.NOT_FOUND).json({
         message: "Faculty member not found",
       });
+      return;
     }
 
     res.status(StatusCodes.OK).json({
@@ -164,7 +168,7 @@ export async function deleteFacultyHandler(
 export async function putFacultyHandler(
   req: Request<{ id: string }, {}, PutFacultyBody>,
   res: Response
-) {
+): Promise<void> {
   try {
     const { id } = req.params;
     const { email, first_name, middle_name, last_name, designation, phone } =
@@ -177,7 +181,7 @@ export async function putFacultyHandler(
         first_name,
         middle_name,
         last_name,
-        phone,
+        phone: Number(phone),
         designation,
         updated_at: new Date(),
       })
@@ -191,7 +195,7 @@ export async function putFacultyHandler(
       .returning();
 
     if (updateResult.length === 0) {
-      return res
+      res
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "Faculty member not found" });
     }
@@ -200,6 +204,7 @@ export async function putFacultyHandler(
       message: "Faculty member updated successfully",
       payload: updateResult[0],
     });
+    return;
   } catch (err: any) {
     console.error(err);
 

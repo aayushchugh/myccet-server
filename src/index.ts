@@ -13,6 +13,7 @@ import { Role } from "./db/schema/user";
 import subjectRouter from "./modules/subject/subject.routes";
 import semesterRouter from "./modules/semester/semester.routes";
 import branchRouter from "./modules/branch/branch.routes";
+import facultyRouter from "./modules/faculty/faculty.routes";
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.use(
   cors({
     credentials: true,
     origin: ["http://localhost:3000", "https://myccet.infyfix.com"],
-  }),
+  })
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -36,6 +37,7 @@ app.use("/admin", requireRoleMiddleware(Role.ADMIN), adminRouter);
 app.use("/subjects", subjectRouter);
 app.use("/semesters", semesterRouter);
 app.use("/branches", branchRouter);
+app.use("/faculty", facultyRouter);
 
 const PORT = process.env.PORT || 8000;
 
