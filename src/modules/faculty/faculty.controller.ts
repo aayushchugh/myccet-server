@@ -34,7 +34,7 @@ export async function postFacultyHandler(
       middle_name,
       phone: Number(phone),
       password: hashedPassword,
-      role: Role.ADMIN,
+      role: Role.FACULTY,
       designation,
       created_at: new Date(),
       updated_at: new Date(),
