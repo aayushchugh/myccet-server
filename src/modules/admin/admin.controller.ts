@@ -1,261 +1,216 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { PostAdminBody, PutAdminBody } from "./admin.schema";
-import bcryptjs from "bcryptjs";
 import logger from "../../libs/logger";
-import db from "../../db";
-import { userTable, Role } from "../../db/schema/user";
-import { and, eq, isNull } from "drizzle-orm";
+import { Designation } from "../../db/schema/user";
+import {
+	createAdmin,
+	getAllAdmins,
+	getAdminById,
+	updateAdmin,
+	deleteAdmin,
+} from "../../services/admin.service";
 
 export async function postAdminHandler(
-  req: Request<{}, {}, PostAdminBody>,
-  res: Response,
+	req: Request<{}, {}, PostAdminBody>,
+	res: Response
 ) {
-  try {
-    const {
-      email,
-      password,
-      first_name,
-      middle_name,
-      last_name,
-      phone,
-      designation,
-    } = req.body;
+	try {
+		const {
+			email,
+			password,
+			first_name,
+			middle_name,
+			last_name,
+			phone,
+			designation,
+		} = req.body;
 
-    // Hash password
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(password, salt);
+		// Create new admin account
+		await createAdmin({
+			email: String(email),
+			password: String(password),
+			first_name: String(first_name),
+			last_name: String(last_name),
+			middle_name: middle_name ? String(middle_name) : undefined,
+			phone: Number(phone),
+			designation: designation as Designation,
+		});
 
-    // Create new admin account
-    await db.insert(userTable).values({
-      email,
-      first_name,
-      last_name,
-      middle_name,
-      phone,
-      password: hashedPassword,
-      role: Role.ADMIN,
-      designation,
-      created_at: new Date(),
-      updated_at: new Date(),
-    });
+		logger.info(
+			`Admin account created with email: ${email} by ${req.user?.id}`,
+			"ADMIN"
+		);
 
-    logger.info(
-      `Admin account created with email: ${email} by ${req.user?.id}`,
-      "ADMIN",
-    );
+		res.status(StatusCodes.CREATED).json({
+			message: "account created successfully",
+		});
 
-    res.status(StatusCodes.CREATED).json({
-      message: "account created successfully",
-    });
+		return;
+	} catch (err: any) {
+		console.error(err);
 
-    return;
-  } catch (err: any) {
-    console.error(err);
+		if (err.code === "23505") {
+			if (err.constraint === "user_email_unique") {
+				res.status(StatusCodes.CONFLICT).json({
+					errors: {
+						email: "account with same email already exists",
+					},
+				});
 
-    if (err.code === "23505") {
-      if (err.constraint === "user_email_unique") {
-        res.status(StatusCodes.CONFLICT).json({
-          errors: {
-            email: "account with same email already exists",
-          },
-        });
+				return;
+			}
 
-        return;
-      }
+			if (err.constraint === "user_phone_unique") {
+				res.status(StatusCodes.CONFLICT).json({
+					errors: {
+						phone: "account with same phone already exists",
+					},
+				});
 
-      if (err.constraint === "user_phone_unique") {
-        res.status(StatusCodes.CONFLICT).json({
-          errors: {
-            phone: "account with same phone already exists",
-          },
-        });
+				return;
+			}
+		}
 
-        return;
-      }
-    }
-
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Internal server error",
-    });
-  }
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
+	}
 }
 
 export async function getAllAdminsHandler(req: Request, res: Response) {
-  try {
-    const admins = await db
-      .select({
-        id: userTable.id,
-        email: userTable.email,
-        first_name: userTable.first_name,
-        middle_name: userTable.middle_name,
-        last_name: userTable.last_name,
-        phone: userTable.phone,
-        designation: userTable.designation,
-      })
-      .from(userTable)
-      .where(and(eq(userTable.role, Role.ADMIN), isNull(userTable.deleted_at)));
+	try {
+		const admins = await getAllAdmins();
 
-    res.status(StatusCodes.OK).json({
-      message: "admins fetched successfully",
-      payload: admins,
-    });
-  } catch (err) {
-    console.error(err);
+		res.status(StatusCodes.OK).json({
+			message: "admins fetched successfully",
+			payload: admins,
+		});
+	} catch (err) {
+		console.error(err);
 
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Internal server error",
-    });
-  }
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
+	}
 }
 
 export async function getAdminHandler(
-  req: Request<{ id: string }>,
-  res: Response,
+	req: Request<{ id: string }>,
+	res: Response
 ) {
-  try {
-    const { id } = req.params;
+	try {
+		const { id } = req.params;
 
-    const [admin] = await db
-      .select({
-        id: userTable.id,
-        email: userTable.email,
-        first_name: userTable.first_name,
-        middle_name: userTable.middle_name,
-        last_name: userTable.last_name,
-        phone: userTable.phone,
-        designation: userTable.designation,
-      })
-      .from(userTable)
-      .where(eq(userTable.id, +id));
+		const admin = await getAdminById(parseInt(id));
 
-    if (!admin) {
-      res.status(StatusCodes.NOT_FOUND).json({
-        message: "Admin not found",
-      });
+		if (!admin) {
+			res.status(StatusCodes.NOT_FOUND).json({
+				message: "Admin not found",
+			});
 
-      return;
-    }
+			return;
+		}
 
-    res.status(StatusCodes.OK).json({
-      message: "Admin fetched successfully",
-      payload: admin,
-    });
+		res.status(StatusCodes.OK).json({
+			message: "Admin fetched successfully",
+			payload: admin,
+		});
 
-    return;
-  } catch (err) {
-    console.error(err);
+		return;
+	} catch (err) {
+		console.error(err);
 
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Internal server error",
-    });
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
 
-    return;
-  }
+		return;
+	}
 }
 
 export async function deleteAdminHandler(
-  req: Request<{ id: string }>,
-  res: Response,
+	req: Request<{ id: string }>,
+	res: Response
 ) {
-  try {
-    const { id } = req.params;
-    console.log(id);
+	try {
+		const { id } = req.params;
 
-    await db
-      .update(userTable)
-      .set({ deleted_at: new Date() })
-      .where(eq(userTable.id, parseInt(id)));
+		const success = await deleteAdmin(parseInt(id));
 
-    res.status(StatusCodes.OK).json({
-      message: "admin deleted successfully",
-    });
-  } catch (err) {
-    console.error(err);
+		if (!success) {
+			res.status(StatusCodes.NOT_FOUND).json({
+				message: "Admin not found",
+			});
+			return;
+		}
 
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Internal server error",
-    });
-  }
+		res.status(StatusCodes.OK).json({
+			message: "admin deleted successfully",
+		});
+	} catch (err) {
+		console.error(err);
+
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
+	}
 }
 
 export async function putAdminHandler(
-  req: Request<{ id: string }, {}, PutAdminBody>,
-  res: Response,
+	req: Request<{ id: string }, {}, PutAdminBody>,
+	res: Response
 ) {
-  try {
-    const { id } = req.params;
-    const { email, first_name, middle_name, last_name, designation, phone } =
-      req.body;
+	try {
+		const { id } = req.params;
+		const { email, first_name, middle_name, last_name, designation, phone } =
+			req.body;
 
-    // Update the admin account, setting the new fields along with the updated_at timestamp.
-    const updateResult = await db
-      .update(userTable)
-      .set({
-        email,
-        first_name,
-        middle_name,
-        last_name,
-        phone,
-        designation,
-        updated_at: new Date(),
-      })
-      .where(
-        and(
-          eq(userTable.id, parseInt(id)),
-          eq(userTable.role, Role.ADMIN),
-          isNull(userTable.deleted_at),
-        ),
-      )
-      .returning({
-        id: userTable.id,
-        email: userTable.email,
-        first_name: userTable.first_name,
-        middle_name: userTable.middle_name,
-        last_name: userTable.last_name,
-        phone: userTable.phone,
-        designation: userTable.designation,
-      });
+		const updatedAdmin = await updateAdmin(parseInt(id), {
+			email: email ? String(email) : undefined,
+			first_name: first_name ? String(first_name) : undefined,
+			middle_name: middle_name !== undefined ? String(middle_name) : null,
+			last_name: last_name !== undefined ? String(last_name) : null,
+			phone: phone ? Number(phone) : undefined,
+			designation: designation as Designation,
+		});
 
-    // If no record is updated, then no matching admin was found.
-    if (updateResult.length === 0) {
-      res.status(StatusCodes.NOT_FOUND).json({ message: "Admin not found" });
+		if (!updatedAdmin) {
+			res.status(StatusCodes.NOT_FOUND).json({ message: "Admin not found" });
+			return;
+		}
 
-      return;
-    }
+		res.status(StatusCodes.OK).json({
+			message: "Admin updated successfully",
+		});
+	} catch (err: any) {
+		console.error(err);
 
-    res.status(StatusCodes.OK).json({
-      message: "Admin updated successfully",
-      payload: updateResult[0],
-    });
-  } catch (err: any) {
-    console.error(err);
+		// Handle unique constraint errors for email and phone as done in the POST handler.
+		if (err.code === "23505") {
+			if (err.constraint === "user_email_unique") {
+				res.status(StatusCodes.CONFLICT).json({
+					errors: {
+						email: "account with same email already exists",
+					},
+				});
 
-    // Handle unique constraint errors for email and phone as done in the POST handler.
-    if (err.code === "23505") {
-      if (err.constraint === "user_email_unique") {
-        res.status(StatusCodes.CONFLICT).json({
-          errors: {
-            email: "account with same email already exists",
-          },
-        });
+				return;
+			}
 
-        return;
-      }
+			if (err.constraint === "user_phone_unique") {
+				res.status(StatusCodes.CONFLICT).json({
+					errors: {
+						phone: "account with same phone already exists",
+					},
+				});
 
-      if (err.constraint === "user_phone_unique") {
-        res.status(StatusCodes.CONFLICT).json({
-          errors: {
-            phone: "account with same phone already exists",
-          },
-        });
+				return;
+			}
+		}
 
-        return;
-      }
-    }
-
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Internal server error",
-    });
-  }
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
+	}
 }

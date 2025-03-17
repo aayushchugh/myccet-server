@@ -1,71 +1,79 @@
-import { Session, sessionTable } from "../../db/schema/session";
-import crypto from "crypto";
-import { sha256 } from "@oslojs/crypto/sha2";
-import { User, userTable } from "../../db/schema/user";
+import { randomBytes } from "crypto";
 import db from "../../db";
+import { sessionTable } from "../../db/schema/session";
+import { getUserByEmail, verifyPassword } from "../../services/user.service";
 import { eq } from "drizzle-orm";
-import {
-	encodeBase32LowerCaseNoPadding,
-	encodeHexLowerCase,
-} from "@oslojs/encoding";
 
+/**
+ * Generate a random session token
+ */
 export function generateSessionToken(): string {
-	const bytes = new Uint8Array(20);
-	crypto.getRandomValues(bytes);
-	const token = encodeBase32LowerCaseNoPadding(bytes);
-	return token;
+	return randomBytes(64).toString("hex");
 }
 
+/**
+ * Create a new session for a user
+ */
 export async function createSession(
 	token: string,
 	userId: number
-): Promise<Session> {
-	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	const session: Session = {
+): Promise<void> {
+	const sessionId = randomBytes(32).toString("hex");
+
+	await db.insert(sessionTable).values({
 		id: sessionId,
+		token,
 		user_id: userId,
-		expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+		expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+	});
+}
+
+/**
+ * Authenticate a user with email and password
+ */
+export async function authenticateUser(email: string, password: string) {
+	// Find user by email
+	const user = await getUserByEmail(email);
+
+	if (!user) {
+		return { success: false, error: "user_not_found" };
+	}
+
+	// Verify password
+	const isPasswordValid = await verifyPassword(password, user.password);
+
+	if (!isPasswordValid) {
+		return { success: false, error: "invalid_password" };
+	}
+
+	// Generate session token
+	const sessionToken = generateSessionToken();
+
+	// Create session
+	await createSession(sessionToken, user.id);
+
+	return {
+		success: true,
+		user,
+		sessionToken,
 	};
-
-	await db.insert(sessionTable).values(session);
-	return session;
 }
 
-export async function validateSessionToken(
-	token: string
-): Promise<SessionValidationResult> {
-	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	const result = await db
-		.select({ user: userTable, session: sessionTable })
+/**
+ * Get session by token
+ */
+export async function getSessionByToken(token: string) {
+	const [session] = await db
+		.select()
 		.from(sessionTable)
-		.innerJoin(userTable, eq(sessionTable.user_id, userTable.id))
-		.where(eq(sessionTable.id, sessionId));
+		.where(eq(sessionTable.token, token));
 
-	if (result.length < 1) {
-		return { session: null, user: null };
-	}
-
-	const { user, session } = result[0];
-	if (Date.now() >= session.expires_at.getTime()) {
-		await db.delete(sessionTable).where(eq(sessionTable.id, session.id));
-		return { session: null, user: null };
-	}
-
-	if (Date.now() >= session.expires_at.getTime() - 1000 * 60 * 60 * 24 * 15) {
-		session.expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
-		await db
-			.update(sessionTable)
-			.set({ expires_at: session.expires_at })
-			.where(eq(sessionTable.id, session.id));
-	}
-
-	return { session, user };
+	return session || null;
 }
 
-export async function invalidateSession(sessionId: string): Promise<void> {
-	await db.delete(sessionTable).where(eq(sessionTable.id, sessionId));
+/**
+ * Delete session
+ */
+export async function deleteSession(token: string): Promise<void> {
+	await db.delete(sessionTable).where(eq(sessionTable.token, token));
 }
-
-export type SessionValidationResult =
-	| { session: Session; user: User }
-	| { session: null; user: null };

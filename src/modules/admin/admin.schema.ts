@@ -27,7 +27,7 @@ export const postAdminBodySchema = z.object({
 		.number({ required_error: "phone number is required" })
 		.min(1000000000, { message: "phone number should be at least 10 digits" })
 		.max(9999999999, { message: "phone number should be at least 10 digits" }),
-	designation: z.enum([Designation.Principal, Designation.Maintenance]),
+	designation: z.enum([Designation.PRINCIPAL, Designation.MAINTENANCE]),
 });
 
 export type PostAdminBody = z.infer<typeof postAdminBodySchema>;
@@ -47,7 +47,7 @@ export const putAdminBodySchema = z.object({
 		.max(9999999999, { message: "phone number should be at least 10 digits" })
 		.optional(),
 	designation: z
-		.enum([Designation.Principal, Designation.Maintenance])
+		.enum([Designation.PRINCIPAL, Designation.MAINTENANCE])
 		.optional(),
 });
 

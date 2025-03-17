@@ -30,7 +30,7 @@ export const postFacultyBodySchema = z.object({
 	designation: z.enum([
 		Designation.HOD,
 		Designation.LECTURER,
-		Designation.Tutor,
+		Designation.TUTOR,
 	]),
 });
 
@@ -47,7 +47,7 @@ export const putFacultyBodySchema = z.object({
 		.max(9999999999, { message: "phone number should be at least 10 digits" })
 		.optional(),
 	designation: z
-		.enum([Designation.HOD, Designation.LECTURER, Designation.Tutor])
+		.enum([Designation.HOD, Designation.LECTURER, Designation.TUTOR])
 		.optional(),
 });
 

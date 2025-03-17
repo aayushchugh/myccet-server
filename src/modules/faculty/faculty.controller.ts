@@ -1,11 +1,15 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { PostFacultyBody, PutFacultyBody } from "./faculty.schema";
-import bcryptjs from "bcryptjs";
 import logger from "../../libs/logger";
-import db from "../../db";
-import { userTable, Role } from "../../db/schema/user";
-import { and, eq, isNull } from "drizzle-orm";
+import { Designation } from "../../db/schema/user";
+import {
+	createFaculty,
+	getAllFaculty,
+	getFacultyById,
+	updateFaculty,
+	deleteFaculty,
+} from "../../services/faculty.service";
 
 export async function postFacultyHandler(
 	req: Request<{}, {}, PostFacultyBody>,
@@ -22,22 +26,15 @@ export async function postFacultyHandler(
 			designation,
 		} = req.body;
 
-		// Hash password
-		const salt = await bcryptjs.genSalt(10);
-		const hashedPassword = await bcryptjs.hash(password, salt);
-
 		// Create new faculty account
-		await db.insert(userTable).values({
-			email,
-			first_name,
-			last_name,
-			middle_name,
+		await createFaculty({
+			email: String(email),
+			password: String(password),
+			first_name: String(first_name),
+			last_name: String(last_name),
+			middle_name: middle_name ? String(middle_name) : undefined,
 			phone: Number(phone),
-			password: hashedPassword,
-			role: Role.FACULTY,
 			designation,
-			created_at: new Date(),
-			updated_at: new Date(),
 		});
 
 		logger.info(`Faculty account created with email: ${email}`, "FACULTY");
@@ -72,21 +69,7 @@ export async function postFacultyHandler(
 
 export async function getAllFacultyHandler(req: Request, res: Response) {
 	try {
-		const faculty = await db
-			.select({
-				id: userTable.id,
-				email: userTable.email,
-				first_name: userTable.first_name,
-				middle_name: userTable.middle_name,
-				last_name: userTable.last_name,
-				phone: userTable.phone,
-				designation: userTable.designation,
-			})
-			.from(userTable)
-			.where(
-				and(eq(userTable.role, Role.FACULTY), isNull(userTable.deleted_at))
-			);
-		console.log("Faculty Data:", faculty);
+		const faculty = await getAllFaculty();
 
 		res.status(StatusCodes.OK).json({
 			message: "Faculty members fetched successfully",
@@ -108,18 +91,7 @@ export async function getFacultyHandler(
 	try {
 		const { id } = req.params;
 
-		const [faculty] = await db
-			.select({
-				id: userTable.id,
-				email: userTable.email,
-				first_name: userTable.first_name,
-				middle_name: userTable.middle_name,
-				last_name: userTable.last_name,
-				phone: userTable.phone,
-				designation: userTable.designation,
-			})
-			.from(userTable)
-			.where(eq(userTable.id, +id));
+		const faculty = await getFacultyById(parseInt(id));
 
 		if (!faculty) {
 			res.status(StatusCodes.NOT_FOUND).json({
@@ -148,10 +120,14 @@ export async function deleteFacultyHandler(
 	try {
 		const { id } = req.params;
 
-		await db
-			.update(userTable)
-			.set({ deleted_at: new Date() })
-			.where(eq(userTable.id, parseInt(id)));
+		const success = await deleteFaculty(parseInt(id));
+
+		if (!success) {
+			res.status(StatusCodes.NOT_FOUND).json({
+				message: "Faculty member not found",
+			});
+			return;
+		}
 
 		res.status(StatusCodes.OK).json({
 			message: "Faculty member deleted successfully",
@@ -174,27 +150,16 @@ export async function putFacultyHandler(
 		const { email, first_name, middle_name, last_name, designation, phone } =
 			req.body;
 
-		const updateResult = await db
-			.update(userTable)
-			.set({
-				email,
-				first_name,
-				middle_name,
-				last_name,
-				phone,
-				designation,
-				updated_at: new Date(),
-			})
-			.where(
-				and(
-					eq(userTable.id, parseInt(id)),
-					eq(userTable.role, Role.FACULTY),
-					isNull(userTable.deleted_at)
-				)
-			)
-			.returning();
+		const updatedFaculty = await updateFaculty(parseInt(id), {
+			email: email ? String(email) : undefined,
+			first_name: first_name ? String(first_name) : undefined,
+			middle_name: middle_name !== undefined ? String(middle_name) : null,
+			last_name: last_name !== undefined ? String(last_name) : null,
+			phone: phone ? Number(phone) : undefined,
+			designation: designation as Designation,
+		});
 
-		if (updateResult.length === 0) {
+		if (!updatedFaculty) {
 			res
 				.status(StatusCodes.NOT_FOUND)
 				.json({ message: "Faculty member not found" });
@@ -208,6 +173,21 @@ export async function putFacultyHandler(
 		return;
 	} catch (err: any) {
 		console.error(err);
+
+		if (err.code === "23505") {
+			if (err.constraint === "user_email_unique") {
+				res.status(StatusCodes.CONFLICT).json({
+					errors: { email: "Account with same email already exists" },
+				});
+				return;
+			}
+			if (err.constraint === "user_phone_unique") {
+				res.status(StatusCodes.CONFLICT).json({
+					errors: { phone: "Account with same phone already exists" },
+				});
+				return;
+			}
+		}
 
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 			message: "Internal server error",
