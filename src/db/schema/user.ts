@@ -5,7 +5,6 @@ import {
 	varchar,
 	timestamp,
 	bigint,
-	text,
 } from "drizzle-orm/pg-core";
 
 export enum Role {

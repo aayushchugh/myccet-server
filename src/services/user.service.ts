@@ -1,8 +1,7 @@
-import { eq, and, isNull, or, sql } from "drizzle-orm";
+import { eq, and, isNull, or } from "drizzle-orm";
 import { compare, genSalt, hash } from "bcryptjs";
 import db from "../db";
 import { User, userTable, Role } from "../db/schema/user";
-import logger from "../libs/logger";
 
 /**
  * Hash a password using bcrypt
