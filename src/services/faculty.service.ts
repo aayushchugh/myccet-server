@@ -1,5 +1,6 @@
 import { eq, and, isNull } from "drizzle-orm";
 import db from "../db";
+import { branchTable } from "../db/schema/branch";
 import {
   facultyTable,
   userTable,
@@ -62,11 +63,12 @@ export async function getAllFaculty() {
       last_name: userTable.last_name,
       phone: userTable.phone,
       designation: facultyTable.designation,
-      branch_id: facultyTable.branch_id,
+      branch: { title: branchTable.title },
     })
     .from(userTable)
-    .innerJoin(facultyTable, eq(userTable.id, facultyTable.user_id));
-   .where(and(eq(userTable.role, Role.FACULTY), isNull(userTable.deleted_at)));
+    .innerJoin(facultyTable, eq(userTable.id, facultyTable.user_id))
+    .innerJoin(branchTable, eq(facultyTable.branch_id, branchTable.id))
+    .where(and(eq(userTable.role, Role.FACULTY), isNull(userTable.deleted_at)));
 
   return faculty;
 }
@@ -84,10 +86,11 @@ export async function getFacultyById(id: number) {
       last_name: userTable.last_name,
       phone: userTable.phone,
       designation: facultyTable.designation,
-      branch_id: facultyTable.branch_id,
+      branch_id: branchTable.id,
     })
     .from(userTable)
     .innerJoin(facultyTable, eq(userTable.id, facultyTable.user_id))
+    .innerJoin(branchTable, eq(facultyTable.branch_id, branchTable.id))
     .where(and(eq(userTable.id, id), isNull(userTable.deleted_at)));
 
   return faculty || null;
