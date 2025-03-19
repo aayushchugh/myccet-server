@@ -65,9 +65,8 @@ export async function getAllFaculty() {
       branch_id: facultyTable.branch_id,
     })
     .from(userTable)
-    .innerJoinJoin(facultyTable, eq(userTable.id, facultyTable.user_id));
-
-  .where(and(eq(userTable.role, Role.FACULTY), isNull(userTable.deleted_at)));
+    .innerJoin(facultyTable, eq(userTable.id, facultyTable.user_id));
+   .where(and(eq(userTable.role, Role.FACULTY), isNull(userTable.deleted_at)));
 
   return faculty;
 }
