@@ -1,5 +1,6 @@
 import { InferSelectModel, sql } from "drizzle-orm";
 import { branchTable } from "./branch";
+
 import {
   integer,
   pgTable,
@@ -73,7 +74,7 @@ export const facultyTable = pgTable("faculty", {
   updated_at: timestamp({ mode: "date" }).defaultNow(),
 });
 
-export const StudentTable = pgTable("student", {
+export const studentTable = pgTable("student", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   user_id: integer()
     .notNull()
@@ -81,6 +82,7 @@ export const StudentTable = pgTable("student", {
   branch_id: integer()
     .notNull()
     .references(() => branchTable.id, { onDelete: "cascade" }),
+
   // Add any student-specific fields here
   registration_number: integer().notNull().unique(),
   created_at: timestamp({ mode: "date" }).defaultNow(),
