@@ -68,6 +68,21 @@ export const facultyTable = pgTable("faculty", {
     .notNull()
     .references(() => branchTable.id, { onDelete: "cascade" }),
   // Add any faculty-specific fields here
+
+  created_at: timestamp({ mode: "date" }).defaultNow(),
+  updated_at: timestamp({ mode: "date" }).defaultNow(),
+});
+
+export const StudentTable = pgTable("student", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  user_id: integer()
+    .notNull()
+    .references(() => userTable.id, { onDelete: "cascade" }),
+  branch_id: integer()
+    .notNull()
+    .references(() => branchTable.id, { onDelete: "cascade" }),
+  // Add any student-specific fields here
+  registration_number: integer().notNull().unique(),
   created_at: timestamp({ mode: "date" }).defaultNow(),
   updated_at: timestamp({ mode: "date" }).defaultNow(),
 });
