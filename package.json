@@ -1,52 +1,53 @@
 {
-	"name": "myccet-server",
-	"version": "1.0.0",
-	"main": "index.js",
-	"scripts": {
-		"dev": "tsx watch src/index.ts",
-		"build": "tsc",
-		"start": "tsx dist/src/index.js",
-		"db:generate": "drizzle-kit generate --name=init",
-		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio",
-		"db:push": "drizzle-kit push"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"description": "",
-	"dependencies": {
-		"@oslojs/crypto": "^1.0.1",
-		"@oslojs/encoding": "^1.1.0",
-		"@types/bcryptjs": "^2.4.6",
-		"@types/cors": "^2.8.17",
-		"@types/express": "^5.0.0",
-		"bcryptjs": "^2.4.3",
-		"cookie-parser": "^1.4.7",
-		"cors": "^2.8.5",
-		"crypto": "^1.0.1",
-		"dotenv": "^16.4.7",
-		"drizzle-orm": "^0.38.4",
-		"express": "^4.21.2",
-		"http-status-codes": "^2.3.0",
-		"jsonwebtoken": "^9.0.2",
-		"module-alias": "^2.2.3",
-		"pg": "^8.13.1",
-		"winston": "^3.17.0",
-		"zod": "^3.24.1"
-	},
-	"devDependencies": {
-		"@types/cookie-parser": "^1.4.8",
-		"@types/pg": "^8.11.11",
-		"drizzle-kit": "^0.30.2",
-		"ts-loader": "^9.5.2",
-		"ts-node-dev": "^2.0.0",
-		"tsconfig-paths": "^4.2.0",
-		"tsx": "^4.19.2",
-		"webpack": "^5.97.1",
-		"webpack-cli": "^6.0.1"
-	},
-	"_moduleAliases": {
-		"@": "dist/src"
-	}
+  "name": "myccet-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "tsx dist/src/index.js",
+    "db:generate": "drizzle-kit generate --name=init",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:push": "drizzle-kit push",
+    "db:migration-revert": "drizzle-kit drop"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@oslojs/crypto": "^1.0.1",
+    "@oslojs/encoding": "^1.1.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.4",
+    "express": "^4.21.2",
+    "http-status-codes": "^2.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
+    "pg": "^8.13.1",
+    "winston": "^3.17.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/pg": "^8.11.11",
+    "drizzle-kit": "^0.30.2",
+    "ts-loader": "^9.5.2",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.2",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "_moduleAliases": {
+    "@": "dist/src"
+  }
 }
