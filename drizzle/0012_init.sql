@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 CREATE TABLE "exam_marks" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "exam_marks_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"student_id" integer NOT NULL,
@@ -34,3 +35,9 @@ ALTER TABLE "semester_subject" ADD CONSTRAINT "semester_subject_semester_id_seme
 ALTER TABLE "semester_subject" ADD CONSTRAINT "semester_subject_subject_id_subject_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."subject"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "student_semester" ADD CONSTRAINT "student_semester_student_id_student_id_fk" FOREIGN KEY ("student_id") REFERENCES "public"."student"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "student_semester" ADD CONSTRAINT "student_semester_semester_id_semester_id_fk" FOREIGN KEY ("semester_id") REFERENCES "public"."semester"("id") ON DELETE cascade ON UPDATE no action;
+=======
+ALTER TABLE "faculty" DROP CONSTRAINT "faculty_registration_number_unique";--> statement-breakpoint
+ALTER TABLE "student" ADD COLUMN "registration_number" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "faculty" DROP COLUMN "registration_number";--> statement-breakpoint
+ALTER TABLE "student" ADD CONSTRAINT "student_registration_number_unique" UNIQUE("registration_number");
+>>>>>>> Stashed changes

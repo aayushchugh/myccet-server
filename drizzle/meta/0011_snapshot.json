@@ -1,5 +1,9 @@
 {
+<<<<<<< Updated upstream
   "id": "559bae6f-53c4-43ec-ad62-3596a1365278",
+=======
+  "id": "2ad58d5d-3de8-4124-8396-4860ede5e5f7",
+>>>>>>> Stashed changes
   "prevId": "51446edc-c215-4d33-8a28-70ddfe9d169d",
   "version": "7",
   "dialect": "postgresql",
@@ -301,12 +305,15 @@
           "primaryKey": false,
           "notNull": true
         },
+<<<<<<< Updated upstream
         "registration_number": {
           "name": "registration_number",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
+=======
+>>>>>>> Stashed changes
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -352,6 +359,7 @@
         }
       },
       "compositePrimaryKeys": {},
+<<<<<<< Updated upstream
       "uniqueConstraints": {
         "student_registration_number_unique": {
           "name": "student_registration_number_unique",
@@ -361,6 +369,9 @@
           ]
         }
       },
+=======
+      "uniqueConstraints": {},
+>>>>>>> Stashed changes
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -476,6 +487,15 @@
           "primaryKey": false,
           "notNull": true
         },
+<<<<<<< Updated upstream
+=======
+        "registration_number": {
+          "name": "registration_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+>>>>>>> Stashed changes
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -521,7 +541,19 @@
         }
       },
       "compositePrimaryKeys": {},
+<<<<<<< Updated upstream
       "uniqueConstraints": {},
+=======
+      "uniqueConstraints": {
+        "faculty_registration_number_unique": {
+          "name": "faculty_registration_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "registration_number"
+          ]
+        }
+      },
+>>>>>>> Stashed changes
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

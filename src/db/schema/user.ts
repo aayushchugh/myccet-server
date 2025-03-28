@@ -74,7 +74,11 @@ export const facultyTable = pgTable("faculty", {
   updated_at: timestamp({ mode: "date" }).defaultNow(),
 });
 
+<<<<<<< Updated upstream
 export const studentTable = pgTable("student", {
+=======
+export const StudentTable = pgTable("student", {
+>>>>>>> Stashed changes
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   user_id: integer()
     .notNull()
@@ -82,7 +86,10 @@ export const studentTable = pgTable("student", {
   branch_id: integer()
     .notNull()
     .references(() => branchTable.id, { onDelete: "cascade" }),
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
   // Add any student-specific fields here
   registration_number: integer().notNull().unique(),
   created_at: timestamp({ mode: "date" }).defaultNow(),
