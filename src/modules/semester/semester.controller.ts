@@ -18,7 +18,7 @@ import { subjectTable } from "@/db/schema/subject";
 
 export async function postCreateSemesterHandler(
   req: Request<{}, {}, PostCreateSemesterBody>,
-  res: Response
+  res: Response,
 ) {
   try {
     const { title, start_date, end_date, branch_id, subject_ids } = req.body;
@@ -34,9 +34,10 @@ export async function postCreateSemesterHandler(
       .returning({ id: semesterTable.id }); // Get inserted semester ID
 
     if (!newSemester) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: "Failed to create semester",
       });
+      return;
     }
 
     const semesterId = newSemester.id;
@@ -119,7 +120,7 @@ export async function getAllSemesterHandler(req: Request, res: Response) {
 
 export async function getSingleSemesterHandler(
   req: Request<{ id: string }>,
-  res: Response
+  res: Response,
 ) {
   try {
     const { id } = req.params;
@@ -137,17 +138,19 @@ export async function getSingleSemesterHandler(
       .where(and(eq(semesterTable.id, +id), isNull(semesterTable.deleted_at)))
       .leftJoin(
         semesterBranchTable,
-        eq(semesterTable.id, semesterBranchTable.semester_id)
+        eq(semesterTable.id, semesterBranchTable.semester_id),
       )
       .innerJoin(
         branchTable,
-        eq(semesterBranchTable.branch_id, branchTable.id)
+        eq(semesterBranchTable.branch_id, branchTable.id),
       );
 
     if (!semester) {
-      return res.status(StatusCodes.NOT_FOUND).json({
+      res.status(StatusCodes.NOT_FOUND).json({
         message: "Semester not found",
       });
+
+      return;
     }
 
     // Fetch subjects related to this semester
@@ -156,7 +159,7 @@ export async function getSingleSemesterHandler(
       .from(subjectTable)
       .innerJoin(
         semesterSubjectTable,
-        eq(subjectTable.id, semesterSubjectTable.subject_id)
+        eq(subjectTable.id, semesterSubjectTable.subject_id),
       )
       .where(eq(semesterSubjectTable.semester_id, +id));
 
@@ -182,7 +185,7 @@ export async function getSingleSemesterHandler(
 
 export async function putSemesterHandler(
   req: Request<{}, {}, PutUpdateSemesterBody>,
-  res: Response
+  res: Response,
 ) {
   try {
     const { title, start_date, end_date } = req.body;
@@ -211,7 +214,7 @@ export async function putSemesterHandler(
 
 export async function deleteSemesterHandler(
   req: Request<{ id: string }>,
-  res: Response
+  res: Response,
 ) {
   try {
     const { id } = req.params;
