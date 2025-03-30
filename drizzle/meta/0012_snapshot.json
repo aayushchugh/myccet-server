@@ -1,6 +1,11 @@
 {
+<<<<<<< Updated upstream
   "id": "75252fb9-4dfc-4f44-af6f-26643ee46ef2",
   "prevId": "559bae6f-53c4-43ec-ad62-3596a1365278",
+=======
+  "id": "191fbc8e-1c16-4931-9f4a-d515ff1bf5e6",
+  "prevId": "2ad58d5d-3de8-4124-8396-4860ede5e5f7",
+>>>>>>> Stashed changes
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -69,6 +74,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+<<<<<<< Updated upstream
     "public.exam_marks": {
       "name": "exam_marks",
       "schema": "",
@@ -373,6 +379,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+=======
+>>>>>>> Stashed changes
     "public.semester": {
       "name": "semester",
       "schema": "",
@@ -572,6 +580,106 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+<<<<<<< Updated upstream
+=======
+    "public.student": {
+      "name": "student",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "student_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "branch_id": {
+          "name": "branch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "registration_number": {
+          "name": "registration_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "student_user_id_user_id_fk": {
+          "name": "student_user_id_user_id_fk",
+          "tableFrom": "student",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "student_branch_id_branch_id_fk": {
+          "name": "student_branch_id_branch_id_fk",
+          "tableFrom": "student",
+          "tableTo": "branch",
+          "columnsFrom": [
+            "branch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "student_registration_number_unique": {
+          "name": "student_registration_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "registration_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+>>>>>>> Stashed changes
     "public.admin": {
       "name": "admin",
       "schema": "",
@@ -733,6 +841,7 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+<<<<<<< Updated upstream
     "public.student": {
       "name": "student",
       "schema": "",
@@ -830,6 +939,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+=======
+>>>>>>> Stashed changes
     "public.user": {
       "name": "user",
       "schema": "",
