@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { PostLoginBody, PostSignupBody } from "./auth.schema";
-import { User, userTable, Role } from "../../db/schema/user";
+import {
+  User,
+  userTable,
+  Role,
+  adminTable,
+  facultyTable,
+} from "../../db/schema/user";
 import db from "../../db";
 import { eq } from "drizzle-orm";
 import logger from "../../libs/logger";
@@ -135,10 +141,18 @@ export async function postLoginHandler(
   }
 }
 
-export function getCurrentUserHandler(req: Request, res: Response) {
+export async function getCurrentUserHandler(req: Request, res: Response) {
   try {
     const { id, email, first_name, last_name, middle_name, phone, role } =
       req.user as User;
+
+    // get designation for admin and faculty
+    const table = role === Role.ADMIN ? adminTable : facultyTable;
+
+    const [adminFaculty] = await db
+      .select({ designation: table.designation })
+      .from(table)
+      .where(eq(table.user_id, id));
 
     res.status(StatusCodes.OK).json({
       message: "user found",
@@ -150,6 +164,7 @@ export function getCurrentUserHandler(req: Request, res: Response) {
         middle_name,
         phone,
         role,
+        designation: adminFaculty?.designation || null,
       },
     });
 
