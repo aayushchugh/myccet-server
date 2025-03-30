@@ -75,6 +75,7 @@ export async function getAllStudents() {
 			phone: userTable.phone,
 			branch: branchTable.title,
 			current_semester: semesterTable.title,
+			father_name: studentTable.father_name,
 		})
 		.from(studentTable)
 		.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
