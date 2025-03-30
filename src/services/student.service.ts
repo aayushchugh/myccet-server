@@ -9,6 +9,8 @@ import {
 } from "@/modules/student/student.schema";
 import { hashPassword } from "./user.service";
 import { studentSemesterTable } from "../db/schema/relation";
+import { branchTable } from "../db/schema/branch";
+import { semesterTable } from "../db/schema/semester";
 
 export async function createStudent(
 	data: z.infer<typeof postCreateStudentSchema>
@@ -62,7 +64,25 @@ export async function getStudentById(id: number) {
 }
 
 export async function getAllStudents() {
-	return await db.select().from(studentTable);
+	return await db
+		.select({
+			id: studentTable.id,
+			registration_number: studentTable.registration_number,
+			first_name: userTable.first_name,
+			middle_name: userTable.middle_name,
+			last_name: userTable.last_name,
+			email: userTable.email,
+			phone: userTable.phone,
+			branch: branchTable.title,
+			semester: semesterTable.title,
+		})
+		.from(studentTable)
+		.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
+		.innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
+		.innerJoin(
+			semesterTable,
+			eq(studentTable.current_semester_id, semesterTable.id)
+		);
 }
 
 export async function updateStudent(

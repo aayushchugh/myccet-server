@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
 	postCreateStudentHandler,
 	getStudentHandler,
+	getAllStudentsHandler,
 } from "./student.controller";
 import { requireLoginMiddleware } from "@/middlewares/require-login.middleware";
 import { requireRoleMiddleware } from "@/middlewares/require-role.middleware";
@@ -19,6 +20,18 @@ studentRouter.post(
 	postCreateStudentHandler
 );
 
-studentRouter.get("/:id", requireLoginMiddleware, getStudentHandler);
+studentRouter.get(
+	"/",
+	requireLoginMiddleware,
+	requireRoleMiddleware(Role.ADMIN),
+	getAllStudentsHandler
+);
+
+studentRouter.get(
+	"/:id",
+	requireLoginMiddleware,
+	requireRoleMiddleware(Role.ADMIN),
+	getStudentHandler
+);
 
 export default studentRouter;
