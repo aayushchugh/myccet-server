@@ -15,43 +15,83 @@ import { semesterTable } from "../db/schema/semester";
 export async function createStudent(
 	data: z.infer<typeof postCreateStudentSchema>
 ) {
-	// Create user account
-	const [user] = await db
-		.insert(userTable)
-		.values({
-			first_name: data.first_name,
-			middle_name: data.middle_name,
-			last_name: data.last_name,
-			email: data.email,
-			password: await hashPassword(data.password),
-			phone: data.phone,
-			role: Role.STUDENT,
-		})
-		.returning();
+	try {
+		// Start a transaction
+		const result = await db.transaction(async tx => {
+			// Check if email already exists
+			const existingUser = await tx
+				.select()
+				.from(userTable)
+				.where(eq(userTable.email, data.email))
+				.limit(1);
 
-	// Create student record
-	const [student] = await db
-		.insert(studentTable)
-		.values({
-			user_id: user.id,
-			branch_id: data.branch_id,
-			registration_number: data.registration_number,
-			current_semester_id: data.current_semester_id,
-			father_name: data.father_name,
-			mother_name: data.mother_name,
-			category: data.category,
-		})
-		.returning();
+			if (existingUser.length > 0) {
+				throw new Error("Email already exists");
+			}
 
-	// link student and semester
-	await db.insert(studentSemesterTable).values({
-		student_id: student.id,
-		semester_id: data.current_semester_id,
-	});
+			// Check if registration number already exists
+			const existingStudent = await tx
+				.select()
+				.from(studentTable)
+				.where(eq(studentTable.registration_number, data.registration_number))
+				.limit(1);
 
-	logger.info(`Student created with ID: ${student.id}`, "STUDENT");
+			if (existingStudent.length > 0) {
+				throw new Error("Registration number already exists");
+			}
 
-	return student;
+			// Create user account
+			const [user] = await tx
+				.insert(userTable)
+				.values({
+					first_name: data.first_name,
+					middle_name: data.middle_name,
+					last_name: data.last_name,
+					email: data.email,
+					password: await hashPassword(data.password),
+					phone: data.phone,
+					role: Role.STUDENT,
+				})
+				.returning();
+
+			if (!user) {
+				throw new Error("Failed to create user account");
+			}
+
+			// Create student record
+			const [student] = await tx
+				.insert(studentTable)
+				.values({
+					user_id: user.id,
+					branch_id: data.branch_id,
+					registration_number: data.registration_number,
+					current_semester_id: data.current_semester_id,
+					father_name: data.father_name,
+					mother_name: data.mother_name,
+					category: data.category,
+				})
+				.returning();
+
+			if (!student) {
+				throw new Error("Failed to create student record");
+			}
+
+			// Link student and semester
+			await tx.insert(studentSemesterTable).values({
+				student_id: student.id,
+				semester_id: data.current_semester_id,
+			});
+
+			logger.info(`Student created with ID: ${student.id}`, "STUDENT");
+
+			return student;
+		});
+
+		return result;
+	} catch (error) {
+		logger.error(`Error creating student: ${error}`, "STUDENT");
+		throw error;
+	}
 }
 
 export async function getStudentById(id: number) {

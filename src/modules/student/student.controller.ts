@@ -23,6 +23,7 @@ export async function postCreateStudentHandler(
 	} catch (err: any) {
 		console.error(err);
 
+		// Handle database constraint violations
 		if (err.code === "23505") {
 			if (err.constraint === "user_email_unique") {
 				res.status(StatusCodes.CONFLICT).json({
@@ -36,7 +37,10 @@ export async function postCreateStudentHandler(
 						phone: "Account with same phone already exists",
 					},
 				});
-			} else if (err.constraint === "student_registration_number_unique") {
+			} else if (
+				err.constraint === "student_registration_number_unique" ||
+				err.detail?.includes("registration_number")
+			) {
 				res.status(StatusCodes.CONFLICT).json({
 					errors: {
 						registration_number:
@@ -44,6 +48,26 @@ export async function postCreateStudentHandler(
 					},
 				});
 			}
+			return;
+		}
+
+		// Handle custom errors from the service layer
+		if (err.message === "Registration number already exists") {
+			res.status(StatusCodes.CONFLICT).json({
+				errors: {
+					registration_number:
+						"Student with same registration number already exists",
+				},
+			});
+			return;
+		}
+
+		if (err.message === "Email already exists") {
+			res.status(StatusCodes.CONFLICT).json({
+				errors: {
+					email: "Account with same email already exists",
+				},
+			});
 			return;
 		}
 
