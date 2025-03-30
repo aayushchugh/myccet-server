@@ -1,136 +1,127 @@
-import { eq, and, isNull } from "drizzle-orm";
-import db from "../db";
-import { branchTable } from "../db/schema/branch";
-import { semesterTable } from "../db/schema/semester";
-import { studentTable, userTable, Role } from "../db/schema/user";
-import { createBaseUser, updateBaseUser, softDeleteUser } from "./user.service";
-import logger from "../libs/logger";
-import { number } from "zod";
-interface StudentData {
-  email: string;
-  password: string;
-  first_name: string;
-  middle_name?: string;
-  last_name?: string;
-  phone: number;
-  registration_number: number;
-  avatar_url?: string;
-  father_name: string;
-  mother_name: string;
-  category: string;
-  course_type: string;
-  branch_id: number;
-  semester_ids: number[];
+import db from "@/db";
+import { userTable, Role, studentTable, Student } from "@/db/schema/user";
+import { eq } from "drizzle-orm";
+import logger from "@/libs/logger";
+import { z } from "zod";
+import {
+	postCreateStudentSchema,
+	putStudentSchema,
+} from "@/modules/student/student.schema";
+import { hashPassword } from "./user.service";
+import { studentSemesterTable } from "../db/schema/relation";
+
+export async function createStudent(
+	data: z.infer<typeof postCreateStudentSchema>
+) {
+	// Create user account
+	const [user] = await db
+		.insert(userTable)
+		.values({
+			first_name: data.first_name,
+			middle_name: data.middle_name,
+			last_name: data.last_name,
+			email: data.email,
+			password: await hashPassword(data.password),
+			phone: data.phone,
+			role: Role.STUDENT,
+		})
+		.returning();
+
+	// Create student record
+	const [student] = await db
+		.insert(studentTable)
+		.values({
+			user_id: user.id,
+			branch_id: data.branch_id,
+			registration_number: data.registration_number,
+			current_semester_id: data.current_semester_id,
+			father_name: data.father_name,
+			mother_name: data.mother_name,
+			category: data.category,
+		})
+		.returning();
+
+	// link student and semester
+	await db.insert(studentSemesterTable).values({
+		student_id: student.id,
+		semester_id: data.current_semester_id,
+	});
+
+	logger.info(`Student created with ID: ${student.id}`, "STUDENT");
+
+	return student;
 }
 
-/**
- * Create a new student
- */
-export async function createStudent(studentData: StudentData): Promise<number> {
-  const userId = await createBaseUser({
-    ...studentData,
-    role: Role.STUDENT,
-  });
-
-  const [student] = await db
-    .insert(studentTable)
-    .values({
-      user_id: userId,
-      registration_number: Number(studentData.registration_number),
-      avatar_url: studentData.avatar_url || null,
-      father_name: String(studentData.father_name),
-      mother_name: String(studentData.mother_name),
-      category: String(studentData.category),
-      course_type: String(studentData.course_type),
-      branch_id: studentData.branch_id,
-    })
-    .returning({ id: studentTable.id });
-
-  logger.info(
-    `Student account created with email: ${studentData.email}`,
-    "STUDENT"
-  );
-
-  return student.id;
+export async function getStudentById(id: number) {
+	return await db
+		.select()
+		.from(studentTable)
+		.where(eq(studentTable.id, id))
+		.limit(1)
+		.then((rows: Student[]) => rows[0]);
 }
 
-/**
- * Get all students with their user details
- */
 export async function getAllStudents() {
-  const students = await db
-    .select({
-      id: userTable.id,
-      email: userTable.email,
-      first_name: userTable.first_name,
-      middle_name: userTable.middle_name,
-      last_name: userTable.last_name,
-      phone: userTable.phone,
-      branch: { title: branchTable.title },
-      semester: { title: semesterTable.title },
-      category: studentTable.category,
-      course_type: studentTable.course_type,
-    })
-    .from(userTable)
-    .innerJoin(studentTable, eq(userTable.id, studentTable.user_id))
-    .innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
-    .innerJoin(semesterTable, eq(studentTable.semester_id, semesterTable.id))
-    .where(and(eq(userTable.role, Role.STUDENT), isNull(userTable.deleted_at)));
-
-  return students;
+	return await db.select().from(studentTable);
 }
 
-/**
- * Get student by ID
- */
-export async function getStudentById(id) {
-  const [student] = await db
-    .select({
-      id: userTable.id,
-      email: userTable.email,
-      first_name: userTable.first_name,
-      middle_name: userTable.middle_name,
-      last_name: userTable.last_name,
-      phone: userTable.phone,
-      branch_id: branchTable.id,
-      semester_id: semesterTable.id,
-      category: studentTable.category,
-      course_type: studentTable.course_type,
-    })
-    .from(userTable)
-    .innerJoin(studentTable, eq(userTable.id, studentTable.user_id))
-    .innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
-    .innerJoin(semesterTable, eq(studentTable.semester_id, semesterTable.id))
-    .where(and(eq(userTable.id, id), isNull(userTable.deleted_at)));
+export async function updateStudent(
+	id: number,
+	data: z.infer<typeof putStudentSchema>
+) {
+	const [student] = await db
+		.select()
+		.from(studentTable)
+		.where(eq(studentTable.id, id));
 
-  return student || null;
+	if (!student) {
+		return null;
+	}
+
+	// Update user details
+	await db
+		.update(userTable)
+		.set({
+			first_name: data.first_name,
+			middle_name: data.middle_name,
+			last_name: data.last_name,
+			email: data.email,
+			phone: data.phone,
+		})
+		.where(eq(userTable.id, student.user_id));
+
+	// Update student details
+	const [updatedStudent] = await db
+		.update(studentTable)
+		.set({
+			branch_id: data.branch_id,
+			current_semester_id: data.current_semester_id,
+			registration_number: data.registration_number,
+			father_name: data.father_name,
+			mother_name: data.mother_name,
+			category: data.category,
+		})
+		.where(eq(studentTable.id, id))
+		.returning();
+
+	return updatedStudent;
 }
 
-/**
- * Update student details
- */
-export async function updateStudent(id, studentData) {
-  const { branch_id, semester_id, ...userData } = studentData;
+export async function deleteStudent(id: number) {
+	const [student] = await db
+		.select()
+		.from(studentTable)
+		.where(eq(studentTable.id, id));
 
-  const updatedUser = await updateBaseUser(id, userData);
+	if (!student) {
+		return false;
+	}
 
-  if (!updatedUser) return null;
+	// Delete student record
+	await db.delete(studentTable).where(eq(studentTable.id, id));
 
-  await db
-    .update(studentTable)
-    .set({
-      branch_id: branch_id || undefined,
-      semester_id: semester_id || undefined,
-      updated_at: new Date(),
-    })
-    .where(eq(studentTable.user_id, id));
+	// Delete user account
+	await db.delete(userTable).where(eq(userTable.id, student.user_id));
 
-  return getStudentById(id);
-}
-
-/**
- * Delete student
- */
-export async function deleteStudent(id) {
-  return softDeleteUser(id);
+	return true;
 }

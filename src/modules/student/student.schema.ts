@@ -2,55 +2,55 @@ import { z } from "zod";
 
 const instituteDomain = process.env.INSTITUTE_DOMAIN;
 if (!instituteDomain) {
-  throw new Error(
-    "INSTITUTE_DOMAIN is not defined in the environment variables."
-  );
+	throw new Error(
+		"INSTITUTE_DOMAIN is not defined in the environment variables."
+	);
 }
 
 const emailRegex = new RegExp(
-  `^[a-zA-Z0-9._%+-]+@${instituteDomain.replace(/\./g, "\\.")}$`
+	`^[a-zA-Z0-9._%+-]+@${instituteDomain.replace(/\./g, "\\.")}$`
 );
 
-export const postStudentBodySchema = z.object({
-  first_name: z.string({ required_error: "First name is required" }),
-  middle_name: z.string().optional(),
-  last_name: z.string().optional(),
-  registration_number: z.string({
-    required_error: "Registration number is required",
-  }),
-  email: z
-    .string()
-    .email({ message: "Please enter a valid email" })
-    .regex(emailRegex, `Email must be on ${instituteDomain} domain`),
-  phone: z
-    .string()
-    .regex(/^\d{10}$/, { message: "Phone number must be 10 digits" }),
-  fathers_name: z.string({ required_error: "Father's name is required" }),
-  mothers_name: z.string({ required_error: "Mother's name is required" }),
-  category: z.string({ required_error: "Category is required" }),
-  semester_id: z.number({ required_error: "Semester ID is required" }),
-  branch_id: z.number({ required_error: "Branch ID is required" }),
-  course_type: z.string({ required_error: "Course type is required" }),
+export const postCreateStudentSchema = z.object({
+	first_name: z.string({ required_error: "Please enter first name" }),
+	middle_name: z.string().optional(),
+	last_name: z.string().optional(),
+	email: z
+		.string()
+		.email({ message: "Please enter a valid email" })
+		.regex(emailRegex, `Email must be on ${instituteDomain} domain`),
+	password: z
+		.string()
+		.min(6, { message: "Password must be at least 6 characters" }),
+	phone: z.number({ required_error: "Please enter phone number" }),
+	branch_id: z.number({ required_error: "Please select a branch" }),
+	registration_number: z.number({
+		required_error: "Please enter registration number",
+	}),
+	current_semester_id: z.number({
+		required_error: "Please select current semester",
+	}),
+	father_name: z.string({ required_error: "Please enter father name" }),
+	mother_name: z.string({ required_error: "Please enter mother name" }),
+	category: z.string({ required_error: "Please enter category" }),
 });
 
-export type PostStudentBody = z.infer<typeof postStudentBodySchema>;
-
-export const putStudentBodySchema = z.object({
-  first_name: z.string().optional(),
-  middle_name: z.string().optional(),
-  last_name: z.string().optional(),
-  registration_number: z.string().optional(),
-  email: z.string().email().optional(),
-  phone: z
-    .string()
-    .regex(/^\d{10}$/, { message: "Phone number must be 10 digits" })
-    .optional(),
-  fathers_name: z.string().optional(),
-  mothers_name: z.string().optional(),
-  category: z.string().optional(),
-  semester_id: z.number().optional(),
-  branch_id: z.number().optional(),
-  course_type: z.string().optional(),
+export const putStudentSchema = z.object({
+	first_name: z.string().optional(),
+	middle_name: z.string().optional(),
+	last_name: z.string().optional(),
+	email: z
+		.string()
+		.email({ message: "Please enter a valid email" })
+		.regex(emailRegex, `Email must be on ${instituteDomain} domain`)
+		.optional(),
+	phone: z.number().optional(),
+	branch_id: z.number().optional(),
+	current_semester_id: z.number().optional(),
+	registration_number: z.number().optional(),
+	father_name: z.string().optional(),
+	mother_name: z.string().optional(),
+	category: z.string().optional(),
 });
 
-export type PutStudentBody = z.infer<typeof putStudentBodySchema>;
+export type PutStudentBody = z.infer<typeof putStudentSchema>;

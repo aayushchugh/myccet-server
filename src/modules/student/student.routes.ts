@@ -1,31 +1,24 @@
 import { Router } from "express";
-import { requireRoleMiddleware } from "../../middlewares/require-role.middleware";
-import { Role } from "../../db/schema/user";
 import {
-  deleteStudentHandler,
-  getStudentHandler,
-  getAllStudentsHandler,
-  postStudentHandler,
-  putStudentHandler,
+	postCreateStudentHandler,
+	getStudentHandler,
 } from "./student.controller";
-import { validateRequestBody } from "../../middlewares/validate-request.middleware";
-import { postStudentBodySchema } from "./student.schema";
+import { requireLoginMiddleware } from "@/middlewares/require-login.middleware";
+import { requireRoleMiddleware } from "@/middlewares/require-role.middleware";
+import { validateRequestBody } from "@/middlewares/validate-request.middleware";
+import { postCreateStudentSchema } from "./student.schema";
+import { Role } from "@/db/schema/user";
 
 const studentRouter = Router();
 
 studentRouter.post(
-  "/",
-  requireRoleMiddleware(Role.ADMIN),
-  validateRequestBody(postStudentBodySchema),
-  postStudentHandler
+	"/",
+	requireLoginMiddleware,
+	requireRoleMiddleware(Role.ADMIN),
+	validateRequestBody(postCreateStudentSchema),
+	postCreateStudentHandler
 );
 
-studentRouter.get("/", getAllStudentsHandler);
-
-studentRouter
-  .route("/:id/")
-  .get(getStudentHandler)
-  .delete(requireRoleMiddleware(Role.ADMIN), deleteStudentHandler)
-  .put(requireRoleMiddleware(Role.ADMIN), putStudentHandler);
+studentRouter.get("/:id", requireLoginMiddleware, getStudentHandler);
 
 export default studentRouter;

@@ -1,0 +1,2 @@
+ALTER TABLE "student" ADD COLUMN "current_semester_id" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "student" ADD CONSTRAINT "student_current_semester_id_semester_id_fk" FOREIGN KEY ("current_semester_id") REFERENCES "public"."semester"("id") ON DELETE cascade ON UPDATE no action;

@@ -1,0 +1,1 @@
+ALTER TABLE "student" ALTER COLUMN "registration_number" SET DATA TYPE bigint;
