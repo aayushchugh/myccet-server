@@ -12,7 +12,7 @@ import {
 	updateSemester,
 	deleteSemester,
 	checkSemesterExists,
-} from "../../services/semester.service";
+} from "./semester.service";
 
 export async function postSemesterHandler(
 	req: Request<{}, {}, PostCreateSemesterBody>,

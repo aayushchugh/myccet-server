@@ -1,14 +1,18 @@
 import { eq } from "drizzle-orm";
-import db from "../db";
+import db from "../../db";
 import {
 	adminTable,
 	userTable,
 	Role,
 	Admin,
 	Designation,
-} from "../db/schema/user";
-import { createBaseUser, updateBaseUser, deleteUser } from "./user.service";
-import logger from "../libs/logger";
+} from "../../db/schema/user";
+import {
+	createBaseUser,
+	updateBaseUser,
+	deleteUser,
+} from "../../services/user.service";
+import logger from "../../libs/logger";
 
 /**
  * Create a new admin

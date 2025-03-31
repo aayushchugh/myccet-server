@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import db from "../db";
-import { branchTable, Branch } from "../db/schema/branch";
-import logger from "../libs/logger";
+import db from "../../db";
+import { branchTable, Branch } from "../../db/schema/branch";
+import logger from "../../libs/logger";
 
 /**
  * Create a new branch

@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import db from "../db";
-import { semesterTable } from "../db/schema/semester";
-import logger from "../libs/logger";
+import db from "../../db";
+import { semesterTable } from "../../db/schema/semester";
+import logger from "../../libs/logger";
 
 /**
  * Create a new semester

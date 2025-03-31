@@ -9,7 +9,7 @@ import {
 	getFacultyById,
 	updateFaculty,
 	deleteFaculty,
-} from "../../services/faculty.service";
+} from "./faculty.service";
 
 export async function postFacultyHandler(
 	req: Request<{}, {}, PostFacultyBody>,

@@ -6,7 +6,7 @@ import {
 	getStudentById,
 	updateStudent,
 	deleteStudent,
-} from "../../services/student.service";
+} from "./student.service";
 import { postCreateStudentSchema, PutStudentBody } from "./student.schema";
 import { z } from "zod";
 

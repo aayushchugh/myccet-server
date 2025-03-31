@@ -7,10 +7,10 @@ import {
 	postCreateStudentSchema,
 	putStudentSchema,
 } from "@/modules/student/student.schema";
-import { hashPassword } from "./user.service";
-import { studentSemesterTable } from "../db/schema/relation";
-import { branchTable } from "../db/schema/branch";
-import { semesterTable } from "../db/schema/semester";
+import { hashPassword } from "../../services/user.service";
+import { studentSemesterTable } from "../../db/schema/relation";
+import { branchTable } from "../../db/schema/branch";
+import { semesterTable } from "../../db/schema/semester";
 
 /**
  * Create a new student

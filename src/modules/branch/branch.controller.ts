@@ -8,7 +8,7 @@ import {
 	updateBranch,
 	deleteBranch,
 	checkBranchExists,
-} from "../../services/branch.service";
+} from "./branch.service";
 import { PostCreateBranchBody, PutUpdateBranchBody } from "./branch.schema";
 
 export async function postBranchHandler(

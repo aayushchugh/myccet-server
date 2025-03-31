@@ -1,8 +1,13 @@
 import { eq } from "drizzle-orm";
-import db from "../db";
-import { facultyTable, userTable, Role, Designation } from "../db/schema/user";
-import logger from "../libs/logger";
-import { hashPassword } from "./user.service";
+import db from "../../db";
+import {
+	facultyTable,
+	userTable,
+	Role,
+	Designation,
+} from "../../db/schema/user";
+import logger from "../../libs/logger";
+import { hashPassword } from "../../services/user.service";
 
 /**
  * Create a new faculty member

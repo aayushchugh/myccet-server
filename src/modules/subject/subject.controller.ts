@@ -8,7 +8,7 @@ import {
 	updateSubject,
 	deleteSubject,
 	checkSubjectExists,
-} from "../../services/subject.service";
+} from "./subject.service";
 import { PostCreateSubjectBody, PutUpdateSubjectBody } from "./subject.schema";
 
 export async function postCreateSubjectHandler(

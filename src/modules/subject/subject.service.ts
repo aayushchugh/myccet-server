@@ -1,7 +1,7 @@
-import { subjectTable } from "../db/schema/subject";
-import db from "../db";
+import { subjectTable } from "../../db/schema/subject";
+import db from "../../db";
 import { eq } from "drizzle-orm";
-import logger from "../libs/logger";
+import logger from "../../libs/logger";
 
 export async function createSubject(data: { title: string; code: string }) {
 	try {
