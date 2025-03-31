@@ -1,4 +1,4 @@
-import { eq, and, isNull, or } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import { compare, genSalt, hash } from "bcryptjs";
 import db from "../db";
 import { User, userTable, Role } from "../db/schema/user";
@@ -21,12 +21,7 @@ export async function checkUserExists(
 	const existingUsers = await db
 		.select({ id: userTable.id })
 		.from(userTable)
-		.where(
-			and(
-				isNull(userTable.deleted_at),
-				or(eq(userTable.email, email), eq(userTable.phone, phone))
-			)
-		);
+		.where(or(eq(userTable.email, email), eq(userTable.phone, phone)));
 
 	return existingUsers.length > 0;
 }
@@ -67,10 +62,7 @@ export async function createBaseUser(userData: {
  * Get user by ID
  */
 export async function getUserById(id: number): Promise<User | null> {
-	const [user] = await db
-		.select()
-		.from(userTable)
-		.where(and(eq(userTable.id, id), isNull(userTable.deleted_at)));
+	const [user] = await db.select().from(userTable).where(eq(userTable.id, id));
 
 	return user || null;
 }
@@ -82,19 +74,18 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 	const [user] = await db
 		.select()
 		.from(userTable)
-		.where(and(eq(userTable.email, email), isNull(userTable.deleted_at)));
+		.where(eq(userTable.email, email));
 
 	return user || null;
 }
 
 /**
- * Soft delete a user
+ * Delete a user
  */
-export async function softDeleteUser(id: number): Promise<boolean> {
+export async function deleteUser(id: number): Promise<boolean> {
 	const result = await db
-		.update(userTable)
-		.set({ deleted_at: new Date() })
-		.where(and(eq(userTable.id, id), isNull(userTable.deleted_at)))
+		.delete(userTable)
+		.where(eq(userTable.id, id))
 		.returning({ id: userTable.id });
 
 	return result.length > 0;
@@ -119,7 +110,7 @@ export async function updateBaseUser(
 			...userData,
 			updated_at: new Date(),
 		})
-		.where(and(eq(userTable.id, id), isNull(userTable.deleted_at)))
+		.where(eq(userTable.id, id))
 		.returning();
 
 	return updatedUser || null;
@@ -132,7 +123,7 @@ export async function getUsersByRole(role: Role): Promise<User[]> {
 	const users = await db
 		.select()
 		.from(userTable)
-		.where(and(eq(userTable.role, role), isNull(userTable.deleted_at)));
+		.where(eq(userTable.role, role));
 
 	return users;
 }

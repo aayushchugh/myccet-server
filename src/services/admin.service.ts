@@ -1,4 +1,4 @@
-import { eq, and, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import db from "../db";
 import {
 	adminTable,
@@ -7,7 +7,7 @@ import {
 	Admin,
 	Designation,
 } from "../db/schema/user";
-import { createBaseUser, updateBaseUser, softDeleteUser } from "./user.service";
+import { createBaseUser, updateBaseUser, deleteUser } from "./user.service";
 import logger from "../libs/logger";
 
 /**
@@ -60,7 +60,7 @@ export async function getAllAdmins() {
 		})
 		.from(userTable)
 		.innerJoin(adminTable, eq(userTable.id, adminTable.user_id))
-		.where(and(eq(userTable.role, Role.ADMIN), isNull(userTable.deleted_at)));
+		.where(eq(userTable.role, Role.ADMIN));
 
 	return admins;
 }
@@ -81,7 +81,7 @@ export async function getAdminById(id: number) {
 		})
 		.from(userTable)
 		.innerJoin(adminTable, eq(userTable.id, adminTable.user_id))
-		.where(and(eq(userTable.id, id), isNull(userTable.deleted_at)));
+		.where(eq(userTable.id, id));
 
 	return admin || null;
 }
@@ -129,5 +129,5 @@ export async function updateAdmin(
  * Delete admin
  */
 export async function deleteAdmin(id: number): Promise<boolean> {
-	return softDeleteUser(id);
+	return deleteUser(id);
 }
