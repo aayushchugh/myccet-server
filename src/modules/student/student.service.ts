@@ -117,23 +117,29 @@ export async function getStudentById(id: number) {
 		const [student] = await db
 			.select({
 				id: studentTable.id,
-				user_id: studentTable.user_id,
-				branch_id: studentTable.branch_id,
 				registration_number: studentTable.registration_number,
 				father_name: studentTable.father_name,
 				mother_name: studentTable.mother_name,
 				category: studentTable.category,
-				current_semester_id: studentTable.current_semester_id,
-				created_at: studentTable.created_at,
-				updated_at: studentTable.updated_at,
 				email: userTable.email,
 				first_name: userTable.first_name,
 				last_name: userTable.last_name,
 				middle_name: userTable.middle_name,
 				phone: userTable.phone,
+				branch: {
+					title: branchTable.title,
+				},
+				semester: {
+					title: semesterTable.title,
+				},
 			})
 			.from(studentTable)
 			.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
+			.innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
+			.innerJoin(
+				semesterTable,
+				eq(studentTable.current_semester_id, semesterTable.id)
+			)
 			.where(eq(studentTable.id, id))
 			.limit(1);
 
