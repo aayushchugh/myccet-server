@@ -84,7 +84,7 @@ export async function getAllFaculty() {
       })
       .from(facultyTable)
       .innerJoin(userTable, eq(facultyTable.user_id, userTable.id))
-      .leftJoin(branchTable, eq(facultyTable.branch_id, branchTable.id))
+      .innerJoin(branchTable, eq(facultyTable.branch_id, branchTable.id))
       .where(eq(userTable.role, Role.FACULTY));
 
     return faculty;
@@ -104,9 +104,7 @@ export async function getFacultyById(id: number) {
         id: facultyTable.id,
         user_id: facultyTable.user_id,
         designation: facultyTable.designation,
-        branch_id: facultyTable.branch_id,
-        created_at: facultyTable.created_at,
-        updated_at: facultyTable.updated_at,
+        branch: branchTable.title,
         email: userTable.email,
         first_name: userTable.first_name,
         last_name: userTable.last_name,
@@ -115,6 +113,7 @@ export async function getFacultyById(id: number) {
       })
       .from(facultyTable)
       .innerJoin(userTable, eq(facultyTable.user_id, userTable.id))
+      .innerJoin(branchTable, eq(facultyTable.branch_id, branchTable.id))
       .where(eq(facultyTable.id, id))
       .limit(1);
 
