@@ -139,9 +139,11 @@ export async function getStudentById(id: number) {
         phone: userTable.phone,
         branch: {
           title: branchTable.title,
+          id: branchTable.id,
         },
         semester: {
           title: semesterTable.title,
+          id: semesterTable.id,
         },
       })
       .from(studentTable)

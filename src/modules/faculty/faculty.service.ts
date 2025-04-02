@@ -107,7 +107,10 @@ export async function getFacultyById(id: number) {
         id: facultyTable.id,
         user_id: facultyTable.user_id,
         designation: facultyTable.designation,
-        branch: branchTable.title,
+        branch: {
+          title: branchTable.title,
+          id: branchTable.id,
+        },
         email: userTable.email,
         first_name: userTable.first_name,
         last_name: userTable.last_name,
