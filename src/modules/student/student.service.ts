@@ -83,7 +83,7 @@ export async function getAllStudents() {
     const students = await db
       .select({
         id: studentTable.id,
-        user_id: studentTable.user_id,
+
         branch: {
           title: branchTable.title,
           id: branchTable.id,
@@ -139,9 +139,11 @@ export async function getStudentById(id: number) {
         phone: userTable.phone,
         branch: {
           title: branchTable.title,
+          id: branchTable.id,
         },
         semester: {
           title: semesterTable.title,
+          id: semesterTable.id,
         },
       })
       .from(studentTable)
