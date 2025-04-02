@@ -92,7 +92,10 @@ export async function getAllStudents() {
         father_name: studentTable.father_name,
         mother_name: studentTable.mother_name,
         category: studentTable.category,
-        semesterTable: studentTable.current_semester_id,
+        semester: {
+          title: semesterTable.title,
+          id: semesterTable.id,
+        },
         created_at: studentTable.created_at,
         updated_at: studentTable.updated_at,
         email: userTable.email,
