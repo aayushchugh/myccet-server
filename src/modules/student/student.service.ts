@@ -84,13 +84,15 @@ export async function getAllStudents() {
       .select({
         id: studentTable.id,
         user_id: studentTable.user_id,
-        branch: branchTable.title,
+        branch: {
+          title: branchTable.title,
+          id: branchTable.id,
+        },
         registration_number: studentTable.registration_number,
         father_name: studentTable.father_name,
         mother_name: studentTable.mother_name,
         category: studentTable.category,
-        semester: semesterTable.title,
-
+        semesterTable: studentTable.current_semester_id,
         created_at: studentTable.created_at,
         updated_at: studentTable.updated_at,
         email: userTable.email,
@@ -102,11 +104,6 @@ export async function getAllStudents() {
       .from(studentTable)
       .innerJoin(userTable, eq(studentTable.user_id, userTable.id))
       .innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
-      .innerJoin(
-        semesterTable,
-        eq(studentTable.current_semester_id, semesterTable.id)
-      )
-
       .where(eq(userTable.role, Role.STUDENT));
 
     return students;
