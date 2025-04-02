@@ -137,7 +137,8 @@ export async function updateFaculty(
     phone?: number;
     designation?: Designation;
     branch_id?: number;
-  },
+    branch: { title: string; id: number };
+  }
 ) {
   try {
     const [faculty] = await db.transaction(async (tx) => {

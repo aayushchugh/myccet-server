@@ -169,6 +169,7 @@ export async function updateStudent(
     last_name?: string | null;
     phone?: number;
     branch_id?: number;
+    branch: { title: string; id: number };
     registration_number?: number;
     father_name?: string;
     mother_name?: string;
@@ -212,7 +213,7 @@ export async function updateStudent(
 
       // Update student if needed
       if (
-        data.branch_id ||
+        data.branch ||
         data.registration_number ||
         data.father_name ||
         data.mother_name ||
