@@ -106,6 +106,10 @@ export async function getAllStudents() {
       })
       .from(studentTable)
       .innerJoin(userTable, eq(studentTable.user_id, userTable.id))
+      .innerJoin(
+        semesterTable,
+        eq(studentTable.current_semester_id, semesterTable.id)
+      )
       .innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
       .where(eq(userTable.role, Role.STUDENT));
 
