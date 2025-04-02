@@ -15,14 +15,15 @@ import semesterRouter from "./modules/semester/semester.routes";
 import branchRouter from "./modules/branch/branch.routes";
 import facultyRouter from "./modules/faculty/faculty.routes";
 import studentRouter from "./modules/student/student.routes";
+import marksRouter from "./modules/marks/marks.routes";
 
 const app = express();
 
 app.use(
-	cors({
-		credentials: true,
-		origin: ["http://localhost:3000", "https://myccet.infyfix.com"],
-	})
+  cors({
+    credentials: true,
+    origin: ["http://localhost:3000", "https://myccet.infyfix.com"],
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -40,11 +41,12 @@ app.use("/semesters", semesterRouter);
 app.use("/branches", branchRouter);
 app.use("/faculty", facultyRouter);
 app.use("/students", studentRouter);
+app.use("/marks", marksRouter);
 
 const PORT = process.env.PORT || 8000;
 
 (async () => {
-	app.listen(PORT, () => {
-		logger.info(`Server is running on port ${PORT}`, "SYSTEM");
-	});
+  app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`, "SYSTEM");
+  });
 })();

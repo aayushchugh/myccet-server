@@ -21,12 +21,8 @@ subjectRouter.post(
 );
 
 subjectRouter.get("/", getAllSubjectsHandler);
-subjectRouter.get("/:code", getSubjectHandler);
-subjectRouter.put(
-  "/:code",
-  requireRoleMiddleware(Role.ADMIN),
-  putSubjectHandler,
-);
+subjectRouter.get("/:id", getSubjectHandler);
+subjectRouter.put("/:id", requireRoleMiddleware(Role.ADMIN), putSubjectHandler);
 subjectRouter.delete("/:code", deleteSubjectHandler);
 
 export default subjectRouter;
