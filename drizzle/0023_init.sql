@@ -1,0 +1,1 @@
+ALTER TABLE "batch" ADD COLUMN "type" varchar(255) DEFAULT 'regular' NOT NULL;
