@@ -6,31 +6,31 @@ import logger from "../../libs/logger";
 /**
  * Create a new semester
  */
-export async function createSemester(data: {
-	title: string;
-	start_date: Date;
-	end_date: Date;
-}) {
-	try {
-		const [semester] = await db
-			.insert(semesterTable)
-			.values({
-				title: data.title,
-				start_date: data.start_date,
-				end_date: data.end_date,
-				created_at: new Date(),
-				updated_at: new Date(),
-			})
-			.returning();
+// export async function createSemester(data: {
+// 	title: string;
+// 	start_date: Date;
+// 	end_date: Date;
+// }) {
+// 	try {
+// 		const [semester] = await db
+// 			.insert(semesterTable)
+// 			.values({
+// 				title: data.title,
+// 				start_date: data.start_date,
+// 				end_date: data.end_date,
+// 				created_at: new Date(),
+// 				updated_at: new Date(),
+// 			})
+// 			.returning();
 
-		logger.info(`Semester created with ID: ${semester.id}`, "SYSTEM");
+// 		logger.info(`Semester created with ID: ${semester.id}`, "SYSTEM");
 
-		return semester;
-	} catch (error) {
-		logger.error(`Error creating semester: ${error}`, "SYSTEM");
-		throw error;
-	}
-}
+// 		return semester;
+// 	} catch (error) {
+// 		logger.error(`Error creating semester: ${error}`, "SYSTEM");
+// 		throw error;
+// 	}
+// }
 
 /**
  * Get all semesters

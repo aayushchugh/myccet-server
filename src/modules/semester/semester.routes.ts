@@ -10,7 +10,7 @@ import {
 	deleteSemesterHandler,
 	getAllSemestersHandler,
 	getSemesterHandler,
-	postSemesterHandler,
+	// postSemesterHandler,
 	putSemesterHandler,
 } from "./semester.controller";
 
@@ -18,11 +18,11 @@ const semesterRouter = Router();
 
 semesterRouter
 	.route("/")
-	.post(
-		requireRoleMiddleware(Role.ADMIN),
-		validateRequestBody(postCreateSemesterSchema),
-		postSemesterHandler
-	)
+	// .post(
+	// 	requireRoleMiddleware(Role.ADMIN),
+	// 	validateRequestBody(postCreateSemesterSchema),
+	// 	postSemesterHandler
+	// )
 	.get(getAllSemestersHandler);
 
 semesterRouter

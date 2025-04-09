@@ -6,7 +6,7 @@ import {
 } from "./semester.schema";
 import logger from "../../libs/logger";
 import {
-	createSemester,
+	// createSemester,
 	getAllSemesters,
 	getSemesterById,
 	updateSemester,
@@ -14,51 +14,51 @@ import {
 	checkSemesterExists,
 } from "./semester.service";
 
-export async function postSemesterHandler(
-	req: Request<{}, {}, PostCreateSemesterBody>,
-	res: Response
-) {
-	try {
-		const { title, start_date, end_date } = req.body;
+// export async function postSemesterHandler(
+// 	req: Request<{}, {}, PostCreateSemesterBody>,
+// 	res: Response
+// ) {
+// 	try {
+// 		const { title, start_date, end_date } = req.body;
 
-		// Check if semester with same title already exists
-		const exists = await checkSemesterExists(title);
-		if (exists) {
-			res.status(StatusCodes.CONFLICT).json({
-				errors: {
-					title: "semester with same title already exists",
-				},
-			});
-			return;
-		}
+// 		// Check if semester with same title already exists
+// 		const exists = await checkSemesterExists(title);
+// 		if (exists) {
+// 			res.status(StatusCodes.CONFLICT).json({
+// 				errors: {
+// 					title: "semester with same title already exists",
+// 				},
+// 			});
+// 			return;
+// 		}
 
-		// Create new semester
-		await createSemester({
-			title: String(title),
-			start_date: new Date(start_date),
-			end_date: new Date(end_date),
-		});
+// 		// Create new semester
+// 		await createSemester({
+// 			title: String(title),
+// 			start_date: new Date(start_date),
+// 			end_date: new Date(end_date),
+// 		});
 
-		logger.info(
-			`Semester created with title: ${title} by ${req.user?.id}`,
-			"SYSTEM"
-		);
+// 		logger.info(
+// 			`Semester created with title: ${title} by ${req.user?.id}`,
+// 			"SYSTEM"
+// 		);
 
-		res.status(StatusCodes.CREATED).json({
-			message: "semester created successfully",
-		});
+// 		res.status(StatusCodes.CREATED).json({
+// 			message: "semester created successfully",
+// 		});
 
-		return;
-	} catch (err) {
-		console.error(err);
+// 		return;
+// 	} catch (err) {
+// 		console.error(err);
 
-		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-			message: "Internal server error",
-		});
+// 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+// 			message: "Internal server error",
+// 		});
 
-		return;
-	}
-}
+// 		return;
+// 	}
+// }
 
 export async function getAllSemestersHandler(req: Request, res: Response) {
 	try {
