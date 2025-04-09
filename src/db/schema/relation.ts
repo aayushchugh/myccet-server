@@ -3,7 +3,7 @@ import { branchTable } from "./branch";
 import { semesterTable } from "./semester";
 import { subjectTable } from "./subject";
 import { studentTable } from "./user";
-import { InferSelectModel } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import { batchTable } from "./batch";
 
 export const semesterBranchTable = pgTable("semester_branch", {
@@ -51,15 +51,3 @@ export const examMarksTable = pgTable("exam_marks", {
 });
 
 export type ExamMarks = InferSelectModel<typeof examMarksTable>;
-
-export const batchSemesterTable = pgTable("batch_semester", {
-	id: integer().primaryKey().generatedAlwaysAsIdentity(),
-	batch_id: integer()
-		.notNull()
-		.references(() => batchTable.id, { onDelete: "cascade" }),
-	semester_id: integer()
-		.notNull()
-		.references(() => semesterTable.id, { onDelete: "cascade" }),
-});
-
-export type BatchSemesterTable = InferSelectModel<typeof batchSemesterTable>;

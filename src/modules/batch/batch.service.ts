@@ -4,7 +4,6 @@ import { batchTable, BatchType } from "../../db/schema/batch";
 import { semesterTable } from "../../db/schema/semester";
 import logger from "../../libs/logger";
 import { PostBatchSchema } from "./batch.schema";
-import { batchSemesterTable } from "../../db/schema/relation";
 import { branchTable } from "../../db/schema/branch";
 
 export async function createBatchService(payload: PostBatchSchema) {
@@ -31,20 +30,12 @@ export async function createBatchService(payload: PostBatchSchema) {
 					.insert(semesterTable)
 					.values({
 						title: (index + 1).toString(),
+						batch_id: newBatch.id,
 					})
 					.returning({ id: semesterTable.id });
 			});
 
-			const semResults = await Promise.all(semPromises);
-
-			const batchSems = semResults.map(result => {
-				return tsx.insert(batchSemesterTable).values({
-					batch_id: newBatch.id,
-					semester_id: result[0].id,
-				});
-			});
-
-			await Promise.all(batchSems);
+			await Promise.all(semPromises);
 		});
 
 		return batch;
@@ -71,8 +62,45 @@ export async function getAllBatchService() {
 
 		return results;
 	} catch (err) {
-		console.log(err);
+		console.error(err);
 		logger.error("Error getting all batch from DB" + err, "BATCH");
 		throw err;
+	}
+}
+
+export async function getBatchService(id: number) {
+	try {
+		const batch = await db
+			.select({
+				id: batchTable.id,
+				start_year: batchTable.start_year,
+				end_year: batchTable.end_year,
+				branch: branchTable.title,
+				type: batchTable.type,
+			})
+			.from(batchTable)
+			.where(eq(batchTable.id, id))
+			.innerJoin(branchTable, eq(batchTable.branch_id, branchTable.id));
+
+		const semesters = await db
+			.select({
+				id: semesterTable.id,
+				title: semesterTable.title,
+				start_date: semesterTable.start_date,
+				end_date: semesterTable.end_date,
+			})
+			.from(semesterTable)
+			.where(eq(semesterTable.batch_id, id));
+
+		const result = {
+			...batch,
+			semesters,
+		};
+
+		return result;
+	} catch (err) {
+		console.error(err);
+		logger.error("Error getting single batch from DB" + err, "BATCH");
+		return;
 	}
 }

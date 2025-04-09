@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { PostBatchSchema } from "./batch.schema";
 import db from "../../db";
-import { createBatchService, getAllBatchService } from "./batch.service";
+import {
+	createBatchService,
+	getAllBatchService,
+	getBatchService,
+} from "./batch.service";
 import logger from "../../libs/logger";
 
 export async function postBatchHandler(
@@ -58,8 +62,37 @@ export async function getAllBatchHandler(req: Request, res: Response) {
 		console.error(err);
 		logger.error("Error getting all Batch", "BATCH");
 
-		return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 			message: "Internal server error",
 		});
+
+		return;
+	}
+}
+
+export async function getBatchHandler(
+	req: Request<{ id: number }>,
+	res: Response
+) {
+	try {
+		const { id } = req.params;
+
+		const batch = await getBatchService(id);
+
+		res.status(StatusCodes.OK).json({
+			message: "Batch fetched successfully",
+			payload: batch,
+		});
+
+		return;
+	} catch (err) {
+		console.error(err);
+		logger.error("Error getting single Batch", "BATCH");
+
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
+
+		return;
 	}
 }
