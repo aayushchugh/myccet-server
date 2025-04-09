@@ -70,7 +70,7 @@ export async function getAllBatchService() {
 
 export async function getBatchService(id: number) {
 	try {
-		const batch = await db
+		const [batch] = await db
 			.select({
 				id: batchTable.id,
 				start_year: batchTable.start_year,
