@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { PostBatchSchema } from "./batch.schema";
-import db from "../../db";
+import { PostBatchDetailsSchema, PostBatchSchema } from "./batch.schema";
 import {
 	createBatchService,
 	getAllBatchService,
 	getBatchService,
 } from "./batch.service";
 import logger from "../../libs/logger";
+import { addSemesterDetailsAndSubjectsService } from "../semester/semester.service";
 
 export async function postBatchHandler(
 	req: Request<{}, {}, PostBatchSchema>,
@@ -43,6 +43,37 @@ export async function postBatchHandler(
 
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 			message: "Internal server Error",
+		});
+
+		return;
+	}
+}
+
+export async function postBatchDetailsHandler(
+	req: Request<{ id: string }, {}, PostBatchDetailsSchema>,
+	res: Response
+) {
+	try {
+		const { id } = req.params;
+		const { semesters } = req.body;
+
+		// check if details of all semesters is provided
+		// check it by using length
+
+		await addSemesterDetailsAndSubjectsService({
+			semesters,
+			batchId: +id,
+		});
+
+		res.status(StatusCodes.OK).json({
+			message: "Semester details added successfully",
+		});
+
+		return;
+	} catch (err) {
+		console.error(err);
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
 		});
 
 		return;

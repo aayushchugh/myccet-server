@@ -16,3 +16,22 @@ export const postBatchSchema = z.object({
 });
 
 export type PostBatchSchema = z.infer<typeof postBatchSchema>;
+
+export const postBatchDetailsSchema = z.object({
+	semesters: z
+		.object({
+			id: z.number({ required_error: "id is required" }),
+			start_date: z
+				.string({ required_error: "Please enter a start year" })
+				.date("Please enter a valid date"),
+			end_date: z
+				.string({ required_error: "Please enter a end year " })
+				.date("Please enter a valid date"),
+			subject_ids: z
+				.number({ required_error: "Please select at least one subject" })
+				.array(),
+		})
+		.array(),
+});
+
+export type PostBatchDetailsSchema = z.infer<typeof postBatchDetailsSchema>;
