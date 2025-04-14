@@ -106,20 +106,13 @@ export async function getBatchService(id: number) {
 }
 
 export async function DeleteBatchService(id: number) {
-  try {
-    const batch = await db
-      .delete(batchTable)
-      .where(eq(batchTable.id, id))
-      .returning();
+  const batch = await db
+    .delete(batchTable)
+    .where(eq(batchTable.id, id))
+    .returning();
 
-    return batch;
-  } catch (err) {
-    console.error(err);
-    logger.error("Error deleting batch from DB" + err, "BATCH");
-    throw err;
-  }
+  return batch;
 }
-
 export async function checkBatchExists(id: number) {
   try {
     const [batch] = await db
