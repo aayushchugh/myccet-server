@@ -15,7 +15,6 @@ import semesterRouter from "./modules/semester/semester.routes";
 import branchRouter from "./modules/branch/branch.routes";
 import facultyRouter from "./modules/faculty/faculty.routes";
 import studentRouter from "./modules/student/student.routes";
-import marksRouter from "./modules/marks/marks.routes";
 import batchRouter from "./modules/batch/batch.routes";
 
 const app = express();
@@ -43,7 +42,6 @@ app.use("/semesters", semesterRouter);
 app.use("/branches", branchRouter);
 app.use("/faculty", facultyRouter);
 app.use("/students", studentRouter);
-app.use("/marks", marksRouter);
 
 const PORT = process.env.PORT || 8000;
 

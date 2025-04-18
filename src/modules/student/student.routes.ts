@@ -1,14 +1,24 @@
 import { Router } from "express";
 import {
 	postCreateStudentHandler,
-	getStudentHandler,
 	getAllStudentsHandler,
+	getStudentHandler,
 	putStudentHandler,
 	deleteStudentHandler,
+	postMarksHandler,
+	putMarksHandler,
+	getStudentSemestersHandler,
+	getSemesterMarksHandler,
+	deleteSemesterMarksHandler,
 } from "./student.controller";
 import { requireRoleMiddleware } from "@/middlewares/require-role.middleware";
 import { validateRequestBody } from "@/middlewares/validate-request.middleware";
-import { postCreateStudentSchema, putStudentSchema } from "./student.schema";
+import {
+	postCreateStudentSchema,
+	postMarksSchema,
+	putMarksSchema,
+	putStudentSchema,
+} from "./student.schema";
 import { Role } from "@/db/schema/user";
 
 const studentRouter = Router();
@@ -39,6 +49,27 @@ studentRouter.delete(
 	"/:id",
 	requireRoleMiddleware(Role.ADMIN),
 	deleteStudentHandler
+);
+
+// Marks routes
+studentRouter.post(
+	"/:id/marks",
+	validateRequestBody(postMarksSchema),
+	postMarksHandler
+);
+studentRouter.put(
+	"/:id/marks",
+	validateRequestBody(putMarksSchema),
+	putMarksHandler
+);
+studentRouter.get("/:id/semesters", getStudentSemestersHandler);
+studentRouter.get(
+	"/:student_id/semesters/:semester_id/marks",
+	getSemesterMarksHandler
+);
+studentRouter.delete(
+	"/:student_id/semesters/:semester_id/marks",
+	deleteSemesterMarksHandler
 );
 
 export default studentRouter;

@@ -6,8 +6,18 @@ import {
 	getStudentById,
 	updateStudent,
 	deleteStudent,
+	createStudentMarks,
+	updateStudentMarks,
+	getStudentSemesterMarks,
+	getStudentSemesters,
+	deleteStudentSemesterMarks,
 } from "./student.service";
-import { postCreateStudentSchema, PutStudentBody } from "./student.schema";
+import {
+	postCreateStudentSchema,
+	PutStudentBody,
+	PostMarksBody,
+	PutMarksBody,
+} from "./student.schema";
 import { z } from "zod";
 
 export async function postCreateStudentHandler(
@@ -227,6 +237,172 @@ export async function deleteStudentHandler(
 	} catch (err) {
 		console.error(err);
 
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
+	}
+}
+
+export async function postMarksHandler(
+	req: Request<{ id: string }, {}, PostMarksBody>,
+	res: Response
+) {
+	try {
+		const { id } = req.params;
+		const marks = await createStudentMarks({
+			...req.body,
+			student_id: parseInt(id),
+		});
+
+		res.status(StatusCodes.CREATED).json({
+			message: "Marks created successfully",
+			payload: marks,
+		});
+	} catch (error: any) {
+		console.error(error);
+
+		switch (error.code) {
+			case "INTERNAL_MARKS_EXCEEDED":
+			case "EXTERNAL_MARKS_EXCEEDED":
+				res.status(StatusCodes.BAD_REQUEST).json({
+					message: error.message,
+				});
+				break;
+
+			case "SUBJECT_NOT_FOUND":
+			case "STUDENT_NOT_FOUND":
+			case "SEMESTER_NOT_FOUND":
+				res.status(StatusCodes.NOT_FOUND).json({
+					message: error.message,
+				});
+				break;
+
+			case "MARKS_ALREADY_EXIST":
+				res.status(StatusCodes.CONFLICT).json({
+					message: error.message,
+				});
+				break;
+
+			default:
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					message: "Internal server error",
+				});
+		}
+	}
+}
+
+export async function putMarksHandler(
+	req: Request<{ id: string }, {}, PutMarksBody>,
+	res: Response
+) {
+	try {
+		const { id } = req.params;
+		const marks = await updateStudentMarks(parseInt(id), req.body);
+
+		res.status(StatusCodes.OK).json({
+			message: "Marks updated successfully",
+			payload: marks,
+		});
+	} catch (error: any) {
+		console.error(error);
+
+		switch (error.code) {
+			case "INTERNAL_MARKS_EXCEEDED":
+			case "EXTERNAL_MARKS_EXCEEDED":
+				res.status(StatusCodes.BAD_REQUEST).json({
+					message: error.message,
+				});
+				break;
+
+			case "SUBJECT_NOT_FOUND":
+			case "STUDENT_NOT_FOUND":
+			case "SEMESTER_NOT_FOUND":
+			case "MARKS_NOT_FOUND":
+				res.status(StatusCodes.NOT_FOUND).json({
+					message: error.message,
+				});
+				break;
+
+			default:
+				res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+					message: "Internal server error",
+				});
+		}
+	}
+}
+
+export async function getStudentSemestersHandler(
+	req: Request<{ id: string }>,
+	res: Response
+) {
+	try {
+		const { id } = req.params;
+
+		const result = await getStudentSemesters(parseInt(id));
+
+		if ("error" in result) {
+			if (result.error === "STUDENT_NOT_FOUND") {
+				res.status(StatusCodes.NOT_FOUND).json({
+					message: "Student not found",
+				});
+				return;
+			}
+			throw new Error(result.error);
+		}
+
+		res.status(StatusCodes.OK).json({
+			message: "Student semesters fetched successfully",
+			payload: result.data,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
+	}
+}
+
+export async function getSemesterMarksHandler(
+	req: Request<{ student_id: string; semester_id: string }>,
+	res: Response
+) {
+	try {
+		const { student_id, semester_id } = req.params;
+
+		const marks = await getStudentSemesterMarks(
+			parseInt(student_id),
+			parseInt(semester_id)
+		);
+
+		res.status(StatusCodes.OK).json({
+			message: "Marks fetched successfully",
+			payload: marks,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+			message: "Internal server error",
+		});
+	}
+}
+
+export async function deleteSemesterMarksHandler(
+	req: Request<{ student_id: string; semester_id: string }>,
+	res: Response
+) {
+	try {
+		const { student_id, semester_id } = req.params;
+
+		await deleteStudentSemesterMarks(
+			parseInt(student_id),
+			parseInt(semester_id)
+		);
+
+		res.status(StatusCodes.OK).json({
+			message: "Marks deleted successfully",
+		});
+	} catch (error) {
+		console.error(error);
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 			message: "Internal server error",
 		});

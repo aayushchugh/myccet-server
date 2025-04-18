@@ -62,3 +62,38 @@ export const putStudentSchema = z.object({
 });
 
 export type PutStudentBody = z.infer<typeof putStudentSchema>;
+
+export const getStudentSemestersSchema = z.object({
+	params: z.object({
+		id: z.string().transform(val => parseInt(val)),
+	}),
+});
+
+export type GetStudentSemestersRequest = z.infer<
+	typeof getStudentSemestersSchema
+>;
+
+// Marks schemas
+export const postMarksSchema = z.object({
+	semester_id: z.number({ required_error: "please enter semester id" }),
+	subject_id: z.number({ required_error: "please enter subject id" }),
+	internal_marks: z
+		.number({ required_error: "please enter internal marks" })
+		.min(0, "internal marks cannot be negative"),
+	external_marks: z
+		.number({ required_error: "please enter external marks" })
+		.min(0, "external marks cannot be negative"),
+});
+
+export type PostMarksBody = z.infer<typeof postMarksSchema>;
+
+export const putMarksSchema = z.object({
+	internal_marks: z
+		.number({ required_error: "please enter internal marks" })
+		.min(0, "internal marks cannot be negative"),
+	external_marks: z
+		.number({ required_error: "please enter external marks" })
+		.min(0, "external marks cannot be negative"),
+});
+
+export type PutMarksBody = z.infer<typeof putMarksSchema>;
