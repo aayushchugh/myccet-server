@@ -1,5 +1,6 @@
 import { InferSelectModel } from "drizzle-orm";
 import { branchTable } from "./branch";
+import { batchTable } from "./batch";
 
 import {
 	integer,
@@ -79,6 +80,9 @@ export const studentTable = pgTable("student", {
 	branch_id: integer()
 		.notNull()
 		.references(() => branchTable.id, { onDelete: "cascade" }),
+	batch_id: integer()
+		.notNull()
+		.references(() => batchTable.id, { onDelete: "cascade" }),
 	// Add any student-specific fields here
 	registration_number: bigint({ mode: "number" }).notNull().unique(),
 	father_name: varchar({ length: 255 }).notNull(),

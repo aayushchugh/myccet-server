@@ -1,0 +1,2 @@
+ALTER TABLE "student" ADD COLUMN "batch_id" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "student" ADD CONSTRAINT "student_batch_id_batch_id_fk" FOREIGN KEY ("batch_id") REFERENCES "public"."batch"("id") ON DELETE cascade ON UPDATE no action;
