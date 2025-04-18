@@ -6,7 +6,6 @@ import {
 	getStudentById,
 	updateStudent,
 	deleteStudent,
-	createStudentMarks,
 	updateStudentMarks,
 	getStudentSemesterMarks,
 	getStudentSemesters,

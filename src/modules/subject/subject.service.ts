@@ -7,6 +7,8 @@ import logger from "../../libs/logger";
 export async function createSubject(data: {
 	title: string;
 	code: string;
+	internal_passing_marks: number;
+	external_passing_marks: number;
 	internal_marks: number;
 	external_marks: number;
 }) {
@@ -16,6 +18,8 @@ export async function createSubject(data: {
 			.values({
 				title: data.title,
 				code: data.code,
+				external_passing_marks: data.external_passing_marks,
+				internal_passing_marks: data.internal_passing_marks,
 				external_marks: data.external_marks,
 				internal_marks: data.internal_marks,
 			})
@@ -126,6 +130,8 @@ export async function updateSubject(
 	data: {
 		title?: string;
 		code?: string;
+		internal_passing_marks?: number;
+		external_passing_marks?: number;
 		internal_marks?: number;
 		external_marks?: number;
 	}
@@ -133,11 +139,18 @@ export async function updateSubject(
 	try {
 		const [subject] = await db
 			.update(subjectTable)
-			.set(data)
+			.set({
+				title: data.title,
+				code: data.code,
+				external_passing_marks: data.external_passing_marks,
+				internal_passing_marks: data.internal_passing_marks,
+				external_marks: data.external_marks,
+				internal_marks: data.internal_marks,
+			})
 			.where(eq(subjectTable.id, id))
 			.returning();
 
-		logger.info(`Subject updated with id: ${id}`, "SYSTEM");
+		logger.info(`Subject updated with ID: ${id}`, "SYSTEM");
 
 		return subject;
 	} catch (err) {
