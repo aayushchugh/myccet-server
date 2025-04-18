@@ -1,10 +1,20 @@
 import { z } from "zod";
 
-export const postMarksBodySchema = z.object({
-	student_id: z.number({ required_error: "Student ID is required" }),
-	subject_id: z.number({ required_error: "Subject ID is required" }),
-	internal_marks: z.number({ required_error: "Internal marks is required" }),
-	external_marks: z.number({ required_error: "External marks is required" }),
+export const postMarksSchema = z.object({
+	student_id: z.number({ required_error: "please enter student id" }),
+	semester_id: z.number({ required_error: "please enter semester id" }),
+	subject_id: z.number({ required_error: "please enter subject id" }),
+	internal_marks: z
+		.number({ required_error: "please enter internal marks" })
+		.min(0, "internal marks cannot be negative"),
+	external_marks: z
+		.number({ required_error: "please enter external marks" })
+		.min(0, "external marks cannot be negative"),
 });
 
-export type PostMarksBodySchema = z.infer<typeof postMarksBodySchema>;
+export type PostMarksBody = z.infer<typeof postMarksSchema>;
+
+export const getMarksSchema = z.object({
+	student_id: z.string().transform(val => parseInt(val)),
+	semester_id: z.string().transform(val => parseInt(val)),
+});

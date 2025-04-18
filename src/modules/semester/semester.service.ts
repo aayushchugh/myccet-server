@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import db from "../../db";
 import { semesterTable } from "../../db/schema/semester";
 import logger from "../../libs/logger";
-import { semesterSubjectTable } from "../../db/schema/relation";
+import { subjectSemesterBranchTable } from "../../db/schema/relation";
 
 /**
  * Create a new semester
@@ -83,19 +83,15 @@ export async function addSemesterDetailsAndSubjectsService({
 	batchId,
 }: AddSemesterDetailsAndSubjectsPayload) {
 	try {
-		/**
-		 * 1. Update existing semester with details
-		 * 2. Create new record in semester subjects relation/table to sync both
-		 */
-
 		await db.transaction(async tx => {
+			// Update semester details
 			const semsPromises = semesters.map(semester => {
-				const sem = tx
+				return tx
 					.update(semesterTable)
 					.set({
 						start_date: new Date(semester.start_date),
 						end_date: new Date(semester.end_date),
-						updated_at: new Date(), // set current time to updated at
+						updated_at: new Date(),
 					})
 					.where(
 						and(
@@ -103,25 +99,23 @@ export async function addSemesterDetailsAndSubjectsService({
 							eq(semesterTable.batch_id, batchId)
 						)
 					);
-
-				// add all subjects for semesters now
-				const semPromises = semester.subject_ids.map(subject => {
-					return tx.insert(semesterSubjectTable).values({
-						subject_id: subject,
-						semester_id: semester.id,
-					});
-				});
-
-				Promise.all(semPromises);
-
-				return sem;
 			});
 
-			return await Promise.all(semsPromises);
+			// Save subjects for each semester
+			const subjectPromises = semesters.flatMap(semester => {
+				return semester.subject_ids.map(subjectId => {
+					return tx.insert(subjectSemesterBranchTable).values({
+						subject_id: subjectId,
+						semester_id: semester.id,
+						branch_id: batchId,
+					});
+				});
+			});
+
+			await Promise.all([...semsPromises, ...subjectPromises]);
 		});
 	} catch (err) {
 		logger.error("Error adding semester details and subjects", "BATCH");
-
 		throw err;
 	}
 }

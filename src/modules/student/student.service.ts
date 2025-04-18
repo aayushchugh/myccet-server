@@ -12,7 +12,6 @@ import { studentSemesterTable } from "../../db/schema/relation";
 import { branchTable } from "../../db/schema/branch";
 import { semesterTable } from "../../db/schema/semester";
 import { batchTable } from "../../db/schema/batch";
-
 /**
  * Create a new student
  */
@@ -32,6 +31,16 @@ export async function createStudent(data: {
 	current_semester_id: number;
 }) {
 	try {
+		// Check if semester exists
+		const [semester] = await db
+			.select()
+			.from(semesterTable)
+			.where(eq(semesterTable.id, data.current_semester_id));
+
+		if (!semester) {
+			throw new Error("Semester not found");
+		}
+
 		const [student] = await db.transaction(async tx => {
 			// Create user first
 			const [user] = await tx
@@ -200,6 +209,18 @@ export async function updateStudent(
 	}
 ) {
 	try {
+		// If current_semester_id is provided, check if it exists
+		if (data.current_semester_id) {
+			const [semester] = await db
+				.select()
+				.from(semesterTable)
+				.where(eq(semesterTable.id, data.current_semester_id));
+
+			if (!semester) {
+				throw new Error("Semester not found");
+			}
+		}
+
 		const [student] = await db.transaction(async tx => {
 			// Get student with user
 			const [studentRecord] = await tx
