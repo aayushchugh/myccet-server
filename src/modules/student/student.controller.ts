@@ -249,14 +249,40 @@ export async function postMarksHandler(
 ) {
 	try {
 		const { id } = req.params;
-		const marks = await createStudentMarks({
+		const { semester_id, subject_id } = req.body;
+
+		// Check if marks already exist for this subject
+		const result = await getStudentSemesterMarks(parseInt(id), semester_id);
+		if ("error" in result) {
+			if (
+				result.error === "STUDENT_NOT_FOUND" ||
+				result.error === "SEMESTER_NOT_FOUND"
+			) {
+				res.status(StatusCodes.NOT_FOUND).json({
+					message:
+						result.error === "STUDENT_NOT_FOUND"
+							? "Student not found"
+							: "Semester not found",
+				});
+				return;
+			}
+			throw new Error(result.error);
+		}
+
+		if (result.data.marks.some(mark => mark.subject.id === subject_id)) {
+			res.status(StatusCodes.CONFLICT).json({
+				message: "Marks for this subject already exist",
+			});
+			return;
+		}
+
+		await createStudentMarks({
 			...req.body,
 			student_id: parseInt(id),
 		});
 
 		res.status(StatusCodes.CREATED).json({
 			message: "Marks created successfully",
-			payload: marks,
 		});
 	} catch (error: any) {
 		console.error(error);
@@ -297,11 +323,10 @@ export async function putMarksHandler(
 ) {
 	try {
 		const { id } = req.params;
-		const marks = await updateStudentMarks(parseInt(id), req.body);
+		await updateStudentMarks(parseInt(id), req.body);
 
 		res.status(StatusCodes.OK).json({
 			message: "Marks updated successfully",
-			payload: marks,
 		});
 	} catch (error: any) {
 		console.error(error);
