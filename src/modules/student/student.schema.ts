@@ -76,13 +76,19 @@ export type GetStudentSemestersRequest = z.infer<
 // Marks schemas
 export const postMarksSchema = z.object({
 	semester_id: z.number({ required_error: "please enter semester id" }),
-	subject_id: z.number({ required_error: "please enter subject id" }),
-	internal_marks: z
-		.number({ required_error: "please enter internal marks" })
-		.min(0, "internal marks cannot be negative"),
-	external_marks: z
-		.number({ required_error: "please enter external marks" })
-		.min(0, "external marks cannot be negative"),
+	marks: z
+		.array(
+			z.object({
+				subject_id: z.number({ required_error: "please enter subject id" }),
+				internal_marks: z
+					.number({ required_error: "please enter internal marks" })
+					.min(0, "internal marks cannot be negative"),
+				external_marks: z
+					.number({ required_error: "please enter external marks" })
+					.min(0, "external marks cannot be negative"),
+			})
+		)
+		.min(1, "at least one subject's marks must be provided"),
 });
 
 export type PostMarksBody = z.infer<typeof postMarksSchema>;

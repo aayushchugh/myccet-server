@@ -11,6 +11,7 @@ import {
 	getStudentSemesterMarks,
 	getStudentSemesters,
 	deleteStudentSemesterMarks,
+	createStudentMarksBulk,
 } from "./student.service";
 import {
 	postCreateStudentSchema,
@@ -249,9 +250,9 @@ export async function postMarksHandler(
 ) {
 	try {
 		const { id } = req.params;
-		const { semester_id, subject_id } = req.body;
+		const { semester_id, marks } = req.body;
 
-		// Check if marks already exist for this subject
+		// Check if marks already exist for any of the subjects
 		const result = await getStudentSemesterMarks(parseInt(id), semester_id);
 		if ("error" in result) {
 			if (
@@ -269,20 +270,37 @@ export async function postMarksHandler(
 			throw new Error(result.error);
 		}
 
-		if (result.data.marks.some(mark => mark.subject.id === subject_id)) {
+		// Check for any existing marks
+		const existingMarks = result.data.marks;
+		const existingSubjectIds = existingMarks.map(mark => mark.subject.id);
+		const duplicateSubjects = marks.filter(mark =>
+			existingSubjectIds.includes(mark.subject_id)
+		);
+
+		if (duplicateSubjects.length > 0) {
 			res.status(StatusCodes.CONFLICT).json({
-				message: "Marks for this subject already exist",
+				message: "Marks already exist for some subjects",
+				details: duplicateSubjects.map(mark => ({
+					subject_id: mark.subject_id,
+					message: "Marks for this subject already exist",
+				})),
 			});
 			return;
 		}
 
-		await createStudentMarks({
-			...req.body,
+		// Create marks for all subjects using the bulk function
+		const createResult = await createStudentMarksBulk({
 			student_id: parseInt(id),
+			semester_id,
+			marks,
 		});
 
+		if ("error" in createResult) {
+			throw new Error(createResult.error);
+		}
+
 		res.status(StatusCodes.CREATED).json({
-			message: "Marks created successfully",
+			message: "Marks created successfully for all subjects",
 		});
 	} catch (error: any) {
 		console.error(error);

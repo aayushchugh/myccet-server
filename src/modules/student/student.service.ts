@@ -735,3 +735,54 @@ export async function deleteStudentSemesterMarks(
 		throw error;
 	}
 }
+
+export async function createStudentMarksBulk(data: {
+	student_id: number;
+	semester_id: number;
+	marks: {
+		subject_id: number;
+		internal_marks: number;
+		external_marks: number;
+	}[];
+}) {
+	try {
+		// Validate all marks in a single transaction
+		const results = await Promise.all(
+			data.marks.map(mark =>
+				validateAndGetEntities({
+					...mark,
+					student_id: data.student_id,
+					semester_id: data.semester_id,
+				})
+			)
+		);
+
+		// Check for any validation errors
+		const errors = results.filter(result => "error" in result);
+		if (errors.length > 0) {
+			return { error: errors[0].error };
+		}
+
+		// Create all marks in a single transaction
+		await db.transaction(async tx => {
+			for (const mark of data.marks) {
+				await tx.insert(studentMarksTable).values({
+					student_id: data.student_id,
+					semester_id: data.semester_id,
+					subject_id: mark.subject_id,
+					internal_marks: mark.internal_marks,
+					external_marks: mark.external_marks,
+					total_marks: mark.internal_marks + mark.external_marks,
+					is_pass: mark.internal_marks + mark.external_marks >= 40,
+					created_at: new Date(),
+					updated_at: new Date(),
+				});
+			}
+		});
+
+		return { success: true };
+	} catch (error) {
+		logger.error(`Error creating student marks: ${error}`, "STUDENT");
+		throw error;
+	}
+}
