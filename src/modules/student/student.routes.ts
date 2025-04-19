@@ -10,6 +10,7 @@ import {
 	getStudentSemestersHandler,
 	getSemesterMarksHandler,
 	deleteSemesterMarksHandler,
+	getProvisionalCertificateHandler,
 } from "./student.controller";
 import { requireRoleMiddleware } from "@/middlewares/require-role.middleware";
 import { validateRequestBody } from "@/middlewares/validate-request.middleware";
@@ -70,6 +71,11 @@ studentRouter.get(
 studentRouter.delete(
 	"/:student_id/semesters/:semester_id/marks",
 	deleteSemesterMarksHandler
+);
+
+studentRouter.get(
+	"/:id/certificate/provisional",
+	getProvisionalCertificateHandler
 );
 
 export default studentRouter;

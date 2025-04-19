@@ -19,6 +19,7 @@ import {
 	PutMarksBody,
 } from "./student.schema";
 import { z } from "zod";
+import { generateCertificate } from "../../services/certificate.service";
 
 export async function postCreateStudentHandler(
 	req: Request<{}, {}, z.infer<typeof postCreateStudentSchema>>,
@@ -448,5 +449,61 @@ export async function deleteSemesterMarksHandler(
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 			message: "Internal server error",
 		});
+	}
+}
+
+export async function getProvisionalCertificateHandler(
+	req: Request<{ id: string }>,
+	res: Response
+): Promise<void> {
+	try {
+		const studentId = parseInt(req.params.id);
+		if (isNaN(studentId)) {
+			res.status(400).json({
+				success: false,
+				error: "INVALID_STUDENT_ID",
+				message: "Invalid student ID",
+			});
+			return;
+		}
+
+		const student = await getStudentById(studentId);
+		if (!student) {
+			res.status(404).json({
+				success: false,
+				error: "STUDENT_NOT_FOUND",
+				message: "Student not found",
+			});
+			return;
+		}
+
+		const result = await generateCertificate({
+			student_name: `${student.first_name} ${student.last_name || ""}`,
+			father_name: student.father_name || "",
+			roll_number: student.registration_number.toString(),
+			registration_number: student.registration_number.toString(),
+			branch: student.branch?.title || "",
+			issue_date: new Date().toLocaleDateString(),
+			session: "2023-2024", // This should be dynamic based on your requirements
+		});
+
+		// Set response headers for PDF download
+		res.setHeader("Content-Type", "application/pdf");
+		res.setHeader(
+			"Content-Disposition",
+			`attachment; filename=provisional_certificate_${studentId}.pdf`
+		);
+
+		// Send the PDF
+		res.send(result);
+		return;
+	} catch (error) {
+		console.error("Error in getProvisionalCertificateHandler:", error);
+		res.status(500).json({
+			success: false,
+			error: "INTERNAL_SERVER_ERROR",
+			message: "An unexpected error occurred",
+		});
+		return;
 	}
 }

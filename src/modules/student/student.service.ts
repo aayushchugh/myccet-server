@@ -181,8 +181,6 @@ export async function getStudentById(id: number) {
 			.where(eq(studentTable.id, id))
 			.limit(1);
 
-		console.log(student);
-
 		return student || null;
 	} catch (error) {
 		logger.error(`Error fetching student: ${error}`, "STUDENT");
