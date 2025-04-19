@@ -66,7 +66,7 @@
 				"
 			>
 				<div style="display: flex; justify-content: center">
-					<img src="./certificate.svg" alt="" style="height: 200px" />
+					<img src="{svg}" alt="College Logo" style="height: 200px" />
 				</div>
 				<div>
 					<p
@@ -91,7 +91,7 @@
 					<div
 						style="width: 80%; display: flex; justify-content: space-between"
 					>
-						<p style="margin-top: 0">Date: ..............</p>
+						<p style="margin-top: 0">Date: <strong>{issue_date}</strong></p>
 
 						<p style="margin-top: 0">Serial No.</p>
 					</div>
@@ -111,28 +111,24 @@
 				</div>
 				<div>
 					<p>
-						This is to certify that
-						Mr./Ms...............................................................
+						This is to certify that Mr./Ms <strong>{name}</strong>
 						Son/D/o Shri
-						...............................................................
-						Institution Roll No..................... Registration
-						No...................... having completed his / her Three Diploma
-						Course in
-						branch................................................................
-						at this Institute from.......................... to
-						.......................... has passed the final diploma examination
-						held in
-						............................................................. under
-						State Board Roll
-						No....................................................................................as
-						per result Notification
-						No.....................................................................
-						dated ....................................... received from the
-						State Board of Technical Education, Punjab, Chandigarh.
+						<strong>{father_name}</strong>
+						Institution Roll No. <strong>{roll_number}</strong> Registration No.
+						<strong>{registration_number}</strong> having completed his / her
+						Three Diploma Course in
+						<strong>{branch}</strong>
+						at this Institute from <strong>{session_start}</strong> to
+						<strong>{session_end}</strong> has passed the final diploma
+						examination held in <strong>{exam_session}</strong> under State
+						Board Roll No. <strong>{state_board_roll}</strong> as per result
+						Notification No. <strong>{notification_number}</strong> dated
+						<strong>{notification_date}</strong> received from the State Board
+						of Technical Education, Punjab, Chandigarh.
 						<br />
-						2. This makes him / her eligible for the award of diploma
-						in...................... The diploma as such shall be issued to
-						him/her as and when received from the Punjab State Board of
+						2. This makes him / her eligible for the award of diploma in
+						<strong>{diploma_name}</strong>. The diploma as such shall be issued
+						to him/her as and when received from the Punjab State Board of
 						TechnicalEducation, Chandigarh.
 					</p>
 				</div>
@@ -167,47 +163,47 @@
 
 						<tr>
 							<td>1st</td>
-							<td></td>
-							<td></td>
-							<td></td>
+							<td>{sem1_date}</td>
+							<td>{sem1_marks}</td>
+							<td>{sem1_total}</td>
 						</tr>
 						<tr>
 							<td>2nd</td>
-							<td></td>
-							<td></td>
-							<td></td>
+							<td>{sem2_date}</td>
+							<td>{sem2_marks}</td>
+							<td>{sem2_total}</td>
 						</tr>
 						<tr>
 							<td>3rd</td>
-							<td></td>
-							<td></td>
-							<td></td>
+							<td>{sem3_date}</td>
+							<td>{sem3_marks}</td>
+							<td>{sem3_total}</td>
 						</tr>
 						<tr>
 							<td>4th</td>
-							<td></td>
-							<td></td>
-							<td></td>
+							<td>{sem4_date}</td>
+							<td>{sem4_marks}</td>
+							<td>{sem4_total}</td>
 						</tr>
 						<tr>
 							<td>5th</td>
-							<td></td>
-							<td></td>
-							<td></td>
+							<td>{sem5_date}</td>
+							<td>{sem5_marks}</td>
+							<td>{sem5_total}</td>
 						</tr>
 						<tr>
 							<td>6th</td>
-							<td></td>
-							<td></td>
-							<td></td>
+							<td>{sem6_date}</td>
+							<td>{sem6_marks}</td>
+							<td>{sem6_total}</td>
 						</tr>
 					</table>
 				</div>
 				<div style="border: 1px solid black; margin: 20px; padding: 5px">
 					<p style="margin: 0">
-						Total Marks obtained ........................ Out of
-						........................ Percentage ........................
-						Division .......................
+						Total Marks obtained <strong>{total_marks}</strong> Out of
+						<strong>{maximum_marks}</strong> Percentage
+						<strong>{percentage}</strong> Division <strong>{division}</strong>
 					</p>
 				</div>
 				<div>
@@ -218,7 +214,7 @@
 						</p>
 						<p>
 							4. During his / her stay in this institution his / her conduct has
-							been reported to be ......................... .
+							been reported to be <strong>{conduct}</strong>.
 						</p>
 						<p>
 							5. So far as known to the undersigned he / she bears a good moral

@@ -40,7 +40,6 @@ export async function createBatchService(payload: PostBatchSchema) {
 
 		return batch;
 	} catch (err) {
-		console.log(err);
 		logger.error("Error creating batch" + err, "BATCH");
 
 		throw err;
