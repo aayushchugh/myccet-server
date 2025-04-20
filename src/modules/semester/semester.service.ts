@@ -84,24 +84,55 @@ export async function addSemesterDetailsAndSubjectsService({
 }: AddSemesterDetailsAndSubjectsPayload) {
 	try {
 		await db.transaction(async tx => {
-			// Update semester details
-			const semsPromises = semesters.map(semester => {
-				return tx
-					.update(semesterTable)
-					.set({
-						start_date: new Date(semester.start_date),
-						end_date: new Date(semester.end_date),
-						updated_at: new Date(),
-					})
-					.where(
-						and(
-							eq(semesterTable.id, semester.id),
-							eq(semesterTable.batch_id, batchId)
-						)
-					);
-			});
+			// First, ensure all semesters exist
+			const semesterCreationPromises = semesters.map(
+				async (semester, index) => {
+					// Check if semester exists
+					const [existingSemester] = await tx
+						.select()
+						.from(semesterTable)
+						.where(and(eq(semesterTable.batch_id, batchId)))
+						.limit(1);
 
-			// Save subjects for each semester
+					if (!existingSemester) {
+						// Create semester if it doesn't exist
+						const [newSemester] = await tx
+							.insert(semesterTable)
+							.values({
+								title: `Semester ${index + 1}`,
+								batch_id: batchId,
+								start_date: new Date(semester.start_date),
+								end_date: new Date(semester.end_date),
+								created_at: new Date(),
+								updated_at: new Date(),
+							})
+							.returning();
+
+						// Update the semester.id to match the newly created semester
+						semester.id = newSemester.id;
+					} else {
+						// Update existing semester
+						await tx
+							.update(semesterTable)
+							.set({
+								start_date: new Date(semester.start_date),
+								end_date: new Date(semester.end_date),
+								updated_at: new Date(),
+							})
+							.where(
+								and(
+									eq(semesterTable.id, semester.id),
+									eq(semesterTable.batch_id, batchId)
+								)
+							);
+					}
+				}
+			);
+
+			// Wait for all semester creations/updates to complete
+			await Promise.all(semesterCreationPromises);
+
+			// Now create subject-semester relationships
 			const subjectPromises = semesters.flatMap(semester => {
 				return semester.subject_ids.map(subjectId => {
 					return tx.insert(subjectSemesterBranchTable).values({
@@ -112,7 +143,7 @@ export async function addSemesterDetailsAndSubjectsService({
 				});
 			});
 
-			await Promise.all([...semsPromises, ...subjectPromises]);
+			await Promise.all(subjectPromises);
 		});
 	} catch (err) {
 		logger.error("Error adding semester details and subjects", "BATCH");
