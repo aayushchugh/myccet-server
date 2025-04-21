@@ -3,6 +3,7 @@ import db from "../../db";
 import { semesterTable } from "../../db/schema/semester";
 import logger from "../../libs/logger";
 import { subjectSemesterBranchTable } from "../../db/schema/relation";
+import { batchTable } from "../../db/schema/batch";
 
 /**
  * Create a new semester
@@ -83,6 +84,16 @@ export async function addSemesterDetailsAndSubjectsService({
 	batchId,
 }: AddSemesterDetailsAndSubjectsPayload) {
 	try {
+		const batch = await db
+			.select()
+			.from(batchTable)
+			.where(eq(batchTable.id, batchId))
+			.limit(1);
+
+		if (!batch) {
+			throw new Error("Batch not found");
+		}
+
 		await db.transaction(async tx => {
 			// First, ensure all semesters exist
 			const semesterCreationPromises = semesters.map(
@@ -138,7 +149,7 @@ export async function addSemesterDetailsAndSubjectsService({
 					return tx.insert(subjectSemesterBranchTable).values({
 						subject_id: subjectId,
 						semester_id: semester.id,
-						branch_id: batchId,
+						branch_id: batch[0].branch_id,
 					});
 				});
 			});
