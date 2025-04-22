@@ -24,7 +24,6 @@ export async function postCreateSubjectHandler(
       external_marks,
     } = req.body;
 
-    // Check if subject with same title or code already exists
     const exists = await checkSubjectExists(title, code);
     if (exists) {
       res.status(StatusCodes.CONFLICT).json({
