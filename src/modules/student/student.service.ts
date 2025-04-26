@@ -9,6 +9,7 @@ import { batchTable } from "../../db/schema/batch";
 import { subjectTable } from "../../db/schema/subject";
 import { studentMarksTable } from "../../db/schema/relation";
 import { sql } from "drizzle-orm";
+import { branchTable } from "../../db/schema/branch";
 
 /**
  * Create a new student
@@ -96,6 +97,11 @@ export async function getAllStudents() {
 					start_year: batchTable.start_year,
 					end_year: batchTable.end_year,
 					type: batchTable.type,
+					title: branchTable.title,
+				},
+				branch: {
+					id: branchTable.id,
+					title: branchTable.title,
 				},
 				registration_number: studentTable.registration_number,
 				father_name: studentTable.father_name,
@@ -120,6 +126,7 @@ export async function getAllStudents() {
 				eq(studentTable.current_semester_id, semesterTable.id)
 			)
 			.innerJoin(batchTable, eq(studentTable.batch_id, batchTable.id))
+			.innerJoin(branchTable, eq(batchTable.branch_id, branchTable.id))
 			.where(eq(userTable.role, Role.STUDENT));
 
 		return students;
@@ -151,6 +158,11 @@ export async function getStudentById(id: number) {
 					start_year: batchTable.start_year,
 					end_year: batchTable.end_year,
 					type: batchTable.type,
+					title: branchTable.title,
+				},
+				branch: {
+					id: branchTable.id,
+					title: branchTable.title,
 				},
 				semester: {
 					title: semesterTable.title,
@@ -160,6 +172,7 @@ export async function getStudentById(id: number) {
 			.from(studentTable)
 			.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
 			.innerJoin(batchTable, eq(studentTable.batch_id, batchTable.id))
+			.innerJoin(branchTable, eq(batchTable.branch_id, branchTable.id))
 			.innerJoin(
 				semesterTable,
 				eq(studentTable.current_semester_id, semesterTable.id)
