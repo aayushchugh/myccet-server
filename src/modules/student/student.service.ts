@@ -92,10 +92,6 @@ export async function getAllStudents() {
 		const students = await db
 			.select({
 				id: studentTable.id,
-				branch: {
-					title: branchTable.title,
-					id: branchTable.id,
-				},
 				batch: {
 					id: batchTable.id,
 					start_year: batchTable.start_year,
