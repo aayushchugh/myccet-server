@@ -272,7 +272,7 @@ export async function postMarksHandler(
 
 		// Check for any existing marks
 		const existingMarks = result.data.marks;
-		const existingSubjectIds = existingMarks.map(mark => mark.subject.id);
+		const existingSubjectIds = existingMarks.map(mark => mark.subject_id);
 		const duplicateSubjects = marks.filter(mark =>
 			existingSubjectIds.includes(mark.subject_id)
 		);

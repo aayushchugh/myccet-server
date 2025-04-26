@@ -591,22 +591,32 @@ export async function getStudentSemesterMarks(
 		// Get all marks for student in semester
 		const marks = await db
 			.select({
+				// id: studentMarksTable.id,
+				// internal_marks: studentMarksTable.internal_marks,
+				// external_marks: studentMarksTable.external_marks,
+				// total_marks: studentMarksTable.total_marks,
+				// is_pass: studentMarksTable.is_pass,
+				// created_at: studentMarksTable.created_at,
+				// updated_at: studentMarksTable.updated_at,
+				// subject: {
+				// 	id: subjectTable.id,
+				// 	title: subjectTable.title,
+				// 	code: subjectTable.code,
+				// 	internal_marks: subjectTable.internal_marks,
+				// 	external_marks: subjectTable.external_marks,
+				// 	internal_passing_marks: subjectTable.internal_passing_marks,
+				// 	external_passing_marks: subjectTable.external_passing_marks,
+				// },
 				id: studentMarksTable.id,
+				subject_id: subjectTable.id,
+				title: subjectTable.title,
+				code: subjectTable.code,
 				internal_marks: studentMarksTable.internal_marks,
 				external_marks: studentMarksTable.external_marks,
+				total_internal_marks: subjectTable.internal_marks,
+				total_external_marks: subjectTable.external_marks,
 				total_marks: studentMarksTable.total_marks,
 				is_pass: studentMarksTable.is_pass,
-				created_at: studentMarksTable.created_at,
-				updated_at: studentMarksTable.updated_at,
-				subject: {
-					id: subjectTable.id,
-					title: subjectTable.title,
-					code: subjectTable.code,
-					internal_marks: subjectTable.internal_marks,
-					external_marks: subjectTable.external_marks,
-					internal_passing_marks: subjectTable.internal_passing_marks,
-					external_passing_marks: subjectTable.external_passing_marks,
-				},
 			})
 			.from(studentMarksTable)
 			.innerJoin(
