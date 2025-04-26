@@ -634,7 +634,7 @@ export async function getStudentSemesterMarks(
 		}
 
 		// Get all marks for student in semester
-		const marks = await db
+		const subjects = await db
 			.select({
 				// id: studentMarksTable.id,
 				// internal_marks: studentMarksTable.internal_marks,
@@ -679,7 +679,7 @@ export async function getStudentSemesterMarks(
 			data: {
 				student,
 				semester,
-				marks,
+				subjects,
 			},
 		};
 	} catch (error) {
