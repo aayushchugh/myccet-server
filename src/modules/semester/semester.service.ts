@@ -4,6 +4,7 @@ import { semesterTable } from "../../db/schema/semester";
 import logger from "../../libs/logger";
 import { subjectSemesterBranchTable } from "../../db/schema/relation";
 import { batchTable } from "../../db/schema/batch";
+import { subjectTable } from "../../db/schema/subject";
 
 /**
  * Create a new semester
@@ -235,6 +236,32 @@ export async function checkSemesterExists(title: string) {
 		return !!semester;
 	} catch (error) {
 		logger.error(`Error checking semester existence: ${error}`, "SYSTEM");
+		throw error;
+	}
+}
+
+export async function getSemesterSubjects(semester_id: number) {
+	try {
+		const subjects = await db
+			.select({
+				id: subjectTable.id,
+				title: subjectTable.title,
+				code: subjectTable.code,
+				internal_marks: subjectTable.internal_marks,
+				external_marks: subjectTable.external_marks,
+				internal_passing_marks: subjectTable.internal_passing_marks,
+				external_passing_marks: subjectTable.external_passing_marks,
+			})
+			.from(subjectSemesterBranchTable)
+			.innerJoin(
+				subjectTable,
+				eq(subjectSemesterBranchTable.subject_id, subjectTable.id)
+			)
+			.where(eq(subjectSemesterBranchTable.semester_id, semester_id));
+
+		return subjects;
+	} catch (error) {
+		logger.error(`Error fetching semester subjects: ${error}`, "SYSTEM");
 		throw error;
 	}
 }

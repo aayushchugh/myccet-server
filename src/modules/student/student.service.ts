@@ -168,6 +168,13 @@ export async function getStudentById(id: number) {
 					title: semesterTable.title,
 					id: semesterTable.id,
 				},
+				semesters: {
+					id: semesterTable.id,
+					title: semesterTable.title,
+					start_date: semesterTable.start_date,
+					end_date: semesterTable.end_date,
+					marks_count: sql<number>`count(${studentMarksTable.id})`,
+				},
 			})
 			.from(studentTable)
 			.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
@@ -177,10 +184,52 @@ export async function getStudentById(id: number) {
 				semesterTable,
 				eq(studentTable.current_semester_id, semesterTable.id)
 			)
+			.leftJoin(
+				studentMarksTable,
+				and(
+					eq(studentMarksTable.student_id, studentTable.id),
+					eq(studentMarksTable.semester_id, semesterTable.id)
+				)
+			)
 			.where(eq(studentTable.id, id))
+			.groupBy(
+				studentTable.id,
+				userTable.id,
+				batchTable.id,
+				branchTable.id,
+				semesterTable.id
+			)
 			.limit(1);
 
-		return student || null;
+		if (!student) {
+			return null;
+		}
+
+		// Get all semesters for the student's batch
+		const allSemesters = await db
+			.select({
+				id: semesterTable.id,
+				title: semesterTable.title,
+				start_date: semesterTable.start_date,
+				end_date: semesterTable.end_date,
+				marks_count: sql<number>`count(${studentMarksTable.id})`,
+			})
+			.from(semesterTable)
+			.leftJoin(
+				studentMarksTable,
+				and(
+					eq(studentMarksTable.student_id, id),
+					eq(studentMarksTable.semester_id, semesterTable.id)
+				)
+			)
+			.where(eq(semesterTable.batch_id, student.batch.id))
+			.groupBy(semesterTable.id)
+			.orderBy(semesterTable.start_date);
+
+		return {
+			...student,
+			semesters: allSemesters,
+		};
 	} catch (error) {
 		logger.error(`Error fetching student: ${error}`, "STUDENT");
 		throw error;

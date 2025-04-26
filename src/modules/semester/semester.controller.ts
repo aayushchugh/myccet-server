@@ -12,6 +12,7 @@ import {
 	updateSemester,
 	deleteSemester,
 	checkSemesterExists,
+	getSemesterSubjects,
 } from "./semester.service";
 
 // export async function postSemesterHandler(
@@ -180,5 +181,35 @@ export async function putSemesterHandler(
 		res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
 			message: "Internal server error",
 		});
+	}
+}
+
+export async function getSemesterSubjectsHandler(
+	req: Request<{ id: string }>,
+	res: Response
+) {
+	try {
+		const semester_id = parseInt(req.params.id);
+		if (isNaN(semester_id)) {
+			res.status(StatusCodes.BAD_REQUEST).json({
+				error: "INVALID_SEMESTER_ID",
+				details: "Semester ID must be a number",
+			});
+
+			return;
+		}
+
+		const subjects = await getSemesterSubjects(semester_id);
+		res.status(StatusCodes.OK).json(subjects);
+
+		return;
+	} catch (error) {
+		logger.error(`Error in getSemesterSubjectsHandler: ${error}`, "SEMESTER");
+		res.status(500).json({
+			error: "INTERNAL_SERVER_ERROR",
+			details: error instanceof Error ? error.message : "Unknown error",
+		});
+
+		return;
 	}
 }

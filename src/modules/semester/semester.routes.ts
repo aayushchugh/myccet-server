@@ -10,6 +10,7 @@ import {
 	deleteSemesterHandler,
 	getAllSemestersHandler,
 	getSemesterHandler,
+	getSemesterSubjectsHandler,
 	// postSemesterHandler,
 	putSemesterHandler,
 } from "./semester.controller";
@@ -34,5 +35,7 @@ semesterRouter
 		putSemesterHandler
 	)
 	.delete(requireRoleMiddleware(Role.ADMIN), deleteSemesterHandler);
+
+semesterRouter.get("/:id/subjects", getSemesterSubjectsHandler);
 
 export default semesterRouter;
