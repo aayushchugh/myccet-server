@@ -685,6 +685,8 @@ export async function getStudentSemesterMarks(
 				...subject,
 				internal_marks: marks?.internal_marks || null,
 				external_marks: marks?.external_marks || null,
+				total_internal_marks: subject.internal_marks,
+				total_external_marks: subject.external_marks,
 				total_marks: marks?.total_marks || null,
 				is_pass: marks?.is_pass || null,
 			};
