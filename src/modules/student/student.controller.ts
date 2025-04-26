@@ -250,7 +250,7 @@ export async function postMarksHandler(
 		const { id } = req.params;
 		const { semester_id, marks } = req.body;
 
-		// Check if marks already exist for any of the subjects
+		// Check if student and semester exist
 		const result = await getStudentSemesterMarks(parseInt(id), semester_id);
 		if ("error" in result) {
 			if (
@@ -268,37 +268,51 @@ export async function postMarksHandler(
 			throw new Error(result.error);
 		}
 
-		// Check for any existing marks
-		const existingMarks = result.data.subjects;
+		// Separate marks into new and existing
+		const existingMarks = result.data.subjects.filter(
+			subject =>
+				subject.internal_marks !== null || subject.external_marks !== null
+		);
 		const existingSubjectIds = existingMarks.map(subject => subject.id);
-		const duplicateSubjects = marks.filter(mark =>
+
+		const newMarks = marks.filter(
+			mark => !existingSubjectIds.includes(mark.subject_id)
+		);
+		const updateMarks = marks.filter(mark =>
 			existingSubjectIds.includes(mark.subject_id)
 		);
 
-		if (duplicateSubjects.length > 0) {
-			res.status(StatusCodes.CONFLICT).json({
-				message: "Marks already exist for some subjects",
-				details: duplicateSubjects.map(mark => ({
-					subject_id: mark.subject_id,
-					message: "Marks for this subject already exist",
-				})),
+		// Create new marks
+		if (newMarks.length > 0) {
+			const createResult = await createStudentMarksBulk({
+				student_id: parseInt(id),
+				semester_id,
+				marks: newMarks,
 			});
-			return;
+
+			if ("error" in createResult) {
+				throw new Error(createResult.error);
+			}
 		}
 
-		// Create marks for all subjects using the bulk function
-		const createResult = await createStudentMarksBulk({
-			student_id: parseInt(id),
-			semester_id,
-			marks,
-		});
-
-		if ("error" in createResult) {
-			throw new Error(createResult.error);
+		// Update existing marks
+		if (updateMarks.length > 0) {
+			await Promise.all(
+				updateMarks.map(mark =>
+					updateStudentMarks(parseInt(id), {
+						internal_marks: mark.internal_marks,
+						external_marks: mark.external_marks,
+					})
+				)
+			);
 		}
 
-		res.status(StatusCodes.CREATED).json({
-			message: "Marks created successfully for all subjects",
+		res.status(StatusCodes.OK).json({
+			message: "Marks processed successfully",
+			details: {
+				created: newMarks.length,
+				updated: updateMarks.length,
+			},
 		});
 	} catch (error: any) {
 		console.error(error);
@@ -315,12 +329,6 @@ export async function postMarksHandler(
 			case "STUDENT_NOT_FOUND":
 			case "SEMESTER_NOT_FOUND":
 				res.status(StatusCodes.NOT_FOUND).json({
-					message: error.message,
-				});
-				break;
-
-			case "MARKS_ALREADY_EXIST":
-				res.status(StatusCodes.CONFLICT).json({
 					message: error.message,
 				});
 				break;
