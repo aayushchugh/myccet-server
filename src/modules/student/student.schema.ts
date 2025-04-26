@@ -24,7 +24,6 @@ export const postCreateStudentSchema = z.object({
 	middle_name: z.string().optional(),
 	last_name: z.string().optional(),
 	phone: z.number({ required_error: "please enter phone" }),
-	branch_id: z.number({ required_error: "please enter branch" }),
 	batch_id: z.number({ required_error: "please enter batch" }),
 	registration_number: z.number({
 		required_error: "please enter registration number",
@@ -52,7 +51,6 @@ export const putStudentSchema = z.object({
 	middle_name: z.string().optional(),
 	last_name: z.string().optional(),
 	phone: z.number().optional(),
-	branch_id: z.number().optional(),
 	batch_id: z.number().optional(),
 	registration_number: z.number().optional(),
 	father_name: z.string().optional(),

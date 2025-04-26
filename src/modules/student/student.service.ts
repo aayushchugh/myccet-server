@@ -4,7 +4,6 @@ import { eq, and } from "drizzle-orm";
 import logger from "@/libs/logger";
 
 import { hashPassword } from "../../services/user.service";
-import { studentSemesterTable } from "../../db/schema/relation";
 import { branchTable } from "../../db/schema/branch";
 import { semesterTable } from "../../db/schema/semester";
 import { batchTable } from "../../db/schema/batch";
@@ -22,7 +21,6 @@ export async function createStudent(data: {
 	last_name?: string;
 	middle_name?: string;
 	phone: number;
-	branch_id: number;
 	batch_id: number;
 	registration_number: number;
 	father_name: string;
@@ -63,7 +61,6 @@ export async function createStudent(data: {
 				.insert(studentTable)
 				.values({
 					user_id: user.id,
-					branch_id: data.branch_id,
 					batch_id: data.batch_id,
 					registration_number: data.registration_number,
 					father_name: data.father_name,
@@ -127,7 +124,6 @@ export async function getAllStudents() {
 				semesterTable,
 				eq(studentTable.current_semester_id, semesterTable.id)
 			)
-			.innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
 			.innerJoin(batchTable, eq(studentTable.batch_id, batchTable.id))
 			.where(eq(userTable.role, Role.STUDENT));
 
@@ -172,7 +168,6 @@ export async function getStudentById(id: number) {
 			})
 			.from(studentTable)
 			.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
-			.innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
 			.innerJoin(batchTable, eq(studentTable.batch_id, batchTable.id))
 			.innerJoin(
 				semesterTable,
@@ -199,7 +194,6 @@ export async function updateStudent(
 		middle_name?: string | null;
 		last_name?: string | null;
 		phone?: number;
-		branch_id?: number;
 		batch_id?: number;
 		registration_number?: number;
 		father_name?: string;
@@ -256,7 +250,6 @@ export async function updateStudent(
 
 			// Update student if needed
 			if (
-				data.branch_id ||
 				data.batch_id ||
 				data.registration_number ||
 				data.father_name ||
@@ -267,7 +260,6 @@ export async function updateStudent(
 				const [updatedStudent] = await tx
 					.update(studentTable)
 					.set({
-						branch_id: data.branch_id,
 						batch_id: data.batch_id,
 						registration_number: data.registration_number,
 						father_name: data.father_name,
