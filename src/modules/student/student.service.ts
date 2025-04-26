@@ -4,13 +4,12 @@ import { eq, and } from "drizzle-orm";
 import logger from "@/libs/logger";
 
 import { hashPassword } from "../../services/user.service";
-import { studentSemesterTable } from "../../db/schema/relation";
-import { branchTable } from "../../db/schema/branch";
 import { semesterTable } from "../../db/schema/semester";
 import { batchTable } from "../../db/schema/batch";
 import { subjectTable } from "../../db/schema/subject";
 import { studentMarksTable } from "../../db/schema/relation";
 import { sql } from "drizzle-orm";
+import { branchTable } from "../../db/schema/branch";
 
 /**
  * Create a new student
@@ -22,7 +21,6 @@ export async function createStudent(data: {
 	last_name?: string;
 	middle_name?: string;
 	phone: number;
-	branch_id: number;
 	batch_id: number;
 	registration_number: number;
 	father_name: string;
@@ -63,7 +61,6 @@ export async function createStudent(data: {
 				.insert(studentTable)
 				.values({
 					user_id: user.id,
-					branch_id: data.branch_id,
 					batch_id: data.batch_id,
 					registration_number: data.registration_number,
 					father_name: data.father_name,
@@ -95,15 +92,16 @@ export async function getAllStudents() {
 		const students = await db
 			.select({
 				id: studentTable.id,
-				branch: {
-					title: branchTable.title,
-					id: branchTable.id,
-				},
 				batch: {
 					id: batchTable.id,
 					start_year: batchTable.start_year,
 					end_year: batchTable.end_year,
 					type: batchTable.type,
+					title: branchTable.title,
+				},
+				branch: {
+					id: branchTable.id,
+					title: branchTable.title,
 				},
 				registration_number: studentTable.registration_number,
 				father_name: studentTable.father_name,
@@ -127,8 +125,8 @@ export async function getAllStudents() {
 				semesterTable,
 				eq(studentTable.current_semester_id, semesterTable.id)
 			)
-			.innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
 			.innerJoin(batchTable, eq(studentTable.batch_id, batchTable.id))
+			.innerJoin(branchTable, eq(batchTable.branch_id, branchTable.id))
 			.where(eq(userTable.role, Role.STUDENT));
 
 		return students;
@@ -155,33 +153,83 @@ export async function getStudentById(id: number) {
 				last_name: userTable.last_name,
 				middle_name: userTable.middle_name,
 				phone: userTable.phone,
-				branch: {
-					title: branchTable.title,
-					id: branchTable.id,
-				},
 				batch: {
 					id: batchTable.id,
 					start_year: batchTable.start_year,
 					end_year: batchTable.end_year,
 					type: batchTable.type,
+					title: branchTable.title,
+				},
+				branch: {
+					id: branchTable.id,
+					title: branchTable.title,
 				},
 				semester: {
 					title: semesterTable.title,
 					id: semesterTable.id,
 				},
+				semesters: {
+					id: semesterTable.id,
+					title: semesterTable.title,
+					start_date: semesterTable.start_date,
+					end_date: semesterTable.end_date,
+					marks_count: sql<number>`count(${studentMarksTable.id})`,
+				},
 			})
 			.from(studentTable)
 			.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
-			.innerJoin(branchTable, eq(studentTable.branch_id, branchTable.id))
 			.innerJoin(batchTable, eq(studentTable.batch_id, batchTable.id))
+			.innerJoin(branchTable, eq(batchTable.branch_id, branchTable.id))
 			.innerJoin(
 				semesterTable,
 				eq(studentTable.current_semester_id, semesterTable.id)
 			)
+			.leftJoin(
+				studentMarksTable,
+				and(
+					eq(studentMarksTable.student_id, studentTable.id),
+					eq(studentMarksTable.semester_id, semesterTable.id)
+				)
+			)
 			.where(eq(studentTable.id, id))
+			.groupBy(
+				studentTable.id,
+				userTable.id,
+				batchTable.id,
+				branchTable.id,
+				semesterTable.id
+			)
 			.limit(1);
 
-		return student || null;
+		if (!student) {
+			return null;
+		}
+
+		// Get all semesters for the student's batch
+		const allSemesters = await db
+			.select({
+				id: semesterTable.id,
+				title: semesterTable.title,
+				start_date: semesterTable.start_date,
+				end_date: semesterTable.end_date,
+				marks_count: sql<number>`count(${studentMarksTable.id})`,
+			})
+			.from(semesterTable)
+			.leftJoin(
+				studentMarksTable,
+				and(
+					eq(studentMarksTable.student_id, id),
+					eq(studentMarksTable.semester_id, semesterTable.id)
+				)
+			)
+			.where(eq(semesterTable.batch_id, student.batch.id))
+			.groupBy(semesterTable.id)
+			.orderBy(semesterTable.start_date);
+
+		return {
+			...student,
+			semesters: allSemesters,
+		};
 	} catch (error) {
 		logger.error(`Error fetching student: ${error}`, "STUDENT");
 		throw error;
@@ -199,7 +247,6 @@ export async function updateStudent(
 		middle_name?: string | null;
 		last_name?: string | null;
 		phone?: number;
-		branch_id?: number;
 		batch_id?: number;
 		registration_number?: number;
 		father_name?: string;
@@ -256,7 +303,6 @@ export async function updateStudent(
 
 			// Update student if needed
 			if (
-				data.branch_id ||
 				data.batch_id ||
 				data.registration_number ||
 				data.father_name ||
@@ -267,7 +313,6 @@ export async function updateStudent(
 				const [updatedStudent] = await tx
 					.update(studentTable)
 					.set({
-						branch_id: data.branch_id,
 						batch_id: data.batch_id,
 						registration_number: data.registration_number,
 						father_name: data.father_name,

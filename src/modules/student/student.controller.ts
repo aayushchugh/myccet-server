@@ -150,7 +150,6 @@ export async function putStudentHandler(
 			father_name,
 			mother_name,
 			category,
-			branch_id,
 			current_semester_id,
 		} = req.body;
 
@@ -165,7 +164,6 @@ export async function putStudentHandler(
 			mother_name,
 			category,
 			current_semester_id,
-			branch_id,
 		});
 
 		if (!updatedStudent) {

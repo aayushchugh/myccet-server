@@ -77,9 +77,6 @@ export const studentTable = pgTable("student", {
 	user_id: integer()
 		.notNull()
 		.references(() => userTable.id, { onDelete: "cascade" }),
-	branch_id: integer()
-		.notNull()
-		.references(() => branchTable.id, { onDelete: "cascade" }),
 	batch_id: integer()
 		.notNull()
 		.references(() => batchTable.id, { onDelete: "cascade" }),
