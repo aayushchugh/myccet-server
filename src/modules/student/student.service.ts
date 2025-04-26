@@ -4,7 +4,6 @@ import { eq, and } from "drizzle-orm";
 import logger from "@/libs/logger";
 
 import { hashPassword } from "../../services/user.service";
-import { branchTable } from "../../db/schema/branch";
 import { semesterTable } from "../../db/schema/semester";
 import { batchTable } from "../../db/schema/batch";
 import { subjectTable } from "../../db/schema/subject";
@@ -147,10 +146,6 @@ export async function getStudentById(id: number) {
 				last_name: userTable.last_name,
 				middle_name: userTable.middle_name,
 				phone: userTable.phone,
-				branch: {
-					title: branchTable.title,
-					id: branchTable.id,
-				},
 				batch: {
 					id: batchTable.id,
 					start_year: batchTable.start_year,
