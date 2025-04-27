@@ -20,6 +20,7 @@ import {
 } from "./student.schema";
 import { z } from "zod";
 import { generateCertificate } from "../../services/certificate.service";
+import { format } from "date-fns";
 
 export async function postCreateStudentHandler(
 	req: Request<{}, {}, z.infer<typeof postCreateStudentSchema>>,
@@ -250,7 +251,7 @@ export async function postMarksHandler(
 		const { id } = req.params;
 		const { semester_id, marks } = req.body;
 
-		// Check if marks already exist for any of the subjects
+		// Check if student and semester exist
 		const result = await getStudentSemesterMarks(parseInt(id), semester_id);
 		if ("error" in result) {
 			if (
@@ -268,37 +269,51 @@ export async function postMarksHandler(
 			throw new Error(result.error);
 		}
 
-		// Check for any existing marks
-		const existingMarks = result.data.marks;
-		const existingSubjectIds = existingMarks.map(mark => mark.subject.id);
-		const duplicateSubjects = marks.filter(mark =>
+		// Separate marks into new and existing
+		const existingMarks = result.data.subjects.filter(
+			subject =>
+				subject.internal_marks !== null || subject.external_marks !== null
+		);
+		const existingSubjectIds = existingMarks.map(subject => subject.id);
+
+		const newMarks = marks.filter(
+			mark => !existingSubjectIds.includes(mark.subject_id)
+		);
+		const updateMarks = marks.filter(mark =>
 			existingSubjectIds.includes(mark.subject_id)
 		);
 
-		if (duplicateSubjects.length > 0) {
-			res.status(StatusCodes.CONFLICT).json({
-				message: "Marks already exist for some subjects",
-				details: duplicateSubjects.map(mark => ({
-					subject_id: mark.subject_id,
-					message: "Marks for this subject already exist",
-				})),
+		// Create new marks
+		if (newMarks.length > 0) {
+			const createResult = await createStudentMarksBulk({
+				student_id: parseInt(id),
+				semester_id,
+				marks: newMarks,
 			});
-			return;
+
+			if ("error" in createResult) {
+				throw new Error(createResult.error);
+			}
 		}
 
-		// Create marks for all subjects using the bulk function
-		const createResult = await createStudentMarksBulk({
-			student_id: parseInt(id),
-			semester_id,
-			marks,
-		});
-
-		if ("error" in createResult) {
-			throw new Error(createResult.error);
+		// Update existing marks
+		if (updateMarks.length > 0) {
+			await Promise.all(
+				updateMarks.map(mark =>
+					updateStudentMarks(parseInt(id), {
+						internal_marks: mark.internal_marks,
+						external_marks: mark.external_marks,
+					})
+				)
+			);
 		}
 
-		res.status(StatusCodes.CREATED).json({
-			message: "Marks created successfully for all subjects",
+		res.status(StatusCodes.OK).json({
+			message: "Marks processed successfully",
+			details: {
+				created: newMarks.length,
+				updated: updateMarks.length,
+			},
 		});
 	} catch (error: any) {
 		console.error(error);
@@ -315,12 +330,6 @@ export async function postMarksHandler(
 			case "STUDENT_NOT_FOUND":
 			case "SEMESTER_NOT_FOUND":
 				res.status(StatusCodes.NOT_FOUND).json({
-					message: error.message,
-				});
-				break;
-
-			case "MARKS_ALREADY_EXIST":
-				res.status(StatusCodes.CONFLICT).json({
 					message: error.message,
 				});
 				break;
@@ -475,14 +484,75 @@ export async function getProvisionalCertificateHandler(
 			return;
 		}
 
+		// Get all semesters with marks for the student
+		const semestersResult = await getStudentSemesters(studentId);
+		if (semestersResult.error || !semestersResult.data) {
+			res.status(404).json({
+				success: false,
+				error: semestersResult.error || "DATA_NOT_FOUND",
+				message: "Failed to get student semesters",
+			});
+			return;
+		}
+
+		// Transform semester data into the format expected by generateCertificate
+		const semesters = semestersResult.data.semesters.map(semester => {
+			const totalMarks = semester.marks.reduce(
+				(sum, mark) => sum + (mark.total_marks || 0),
+				0
+			);
+			const totalMaxMarks = semester.marks.reduce(
+				(sum, mark) =>
+					sum + (mark.total_internal_marks + mark.total_external_marks),
+				0
+			);
+
+			return {
+				semester_number: semester.id,
+				date: semester.end_date
+					? format(new Date(semester.end_date), "MMM/yyyy")
+					: "",
+				subjects: semester.marks.map(mark => ({
+					title: mark.title,
+					marks_obtained: mark.total_marks || 0,
+					maximum_marks: mark.total_internal_marks + mark.total_external_marks,
+				})),
+				total_marks_obtained: totalMarks,
+				total_maximum_marks: totalMaxMarks,
+			};
+		});
+
+		// Calculate overall totals
+		const totalMarks = semesters.reduce(
+			(sum, sem) => sum + sem.total_marks_obtained,
+			0
+		);
+		const totalMaxMarks = semesters.reduce(
+			(sum, sem) => sum + sem.total_maximum_marks,
+			0
+		);
+		const percentage = ((totalMarks / totalMaxMarks) * 100).toFixed(2);
+
+		// Determine division based on percentage
+		let division = "";
+		if (parseFloat(percentage) >= 60) division = "First Division";
+		else if (parseFloat(percentage) >= 50) division = "Second Division";
+		else if (parseFloat(percentage) >= 40) division = "Third Division";
+		else division = "Fail";
+
 		const result = await generateCertificate({
 			student_name: `${student.first_name} ${student.last_name || ""}`,
 			father_name: student.father_name || "",
 			roll_number: student.registration_number.toString(),
 			registration_number: student.registration_number.toString(),
 			branch: student.branch?.title || "",
-			issue_date: new Date().toLocaleDateString(),
+			issue_date: new Date().toISOString(),
 			session: "2023-2024", // This should be dynamic based on your requirements
+			semesters,
+			total_marks: totalMarks.toString(),
+			maximum_marks: totalMaxMarks.toString(),
+			percentage,
+			division,
 		});
 
 		// Set response headers for PDF download

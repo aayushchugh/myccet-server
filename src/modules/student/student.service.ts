@@ -10,6 +10,7 @@ import { subjectTable } from "../../db/schema/subject";
 import { studentMarksTable } from "../../db/schema/relation";
 import { sql } from "drizzle-orm";
 import { branchTable } from "../../db/schema/branch";
+import { subjectSemesterBranchTable } from "../../db/schema/relation";
 
 /**
  * Create a new student
@@ -614,6 +615,7 @@ export async function getStudentSemesterMarks(
 				id: studentTable.id,
 				first_name: userTable.first_name,
 				last_name: userTable.last_name,
+				batch_id: studentTable.batch_id,
 			})
 			.from(studentTable)
 			.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
@@ -633,31 +635,39 @@ export async function getStudentSemesterMarks(
 			return { error: "SEMESTER_NOT_FOUND" };
 		}
 
-		// Get all marks for student in semester
-		const marks = await db
+		// Get all subjects for this semester and batch
+		const allSubjects = await db
 			.select({
-				id: studentMarksTable.id,
+				id: subjectTable.id,
+				title: subjectTable.title,
+				code: subjectTable.code,
+				internal_marks: subjectTable.internal_marks,
+				external_marks: subjectTable.external_marks,
+				internal_passing_marks: subjectTable.internal_passing_marks,
+				external_passing_marks: subjectTable.external_passing_marks,
+			})
+			.from(subjectSemesterBranchTable)
+			.innerJoin(
+				subjectTable,
+				eq(subjectSemesterBranchTable.subject_id, subjectTable.id)
+			)
+			.where(
+				and(
+					eq(subjectSemesterBranchTable.semester_id, semester_id),
+					eq(subjectSemesterBranchTable.branch_id, student.batch_id)
+				)
+			);
+
+		// Get student's marks for these subjects
+		const studentMarks = await db
+			.select({
+				subject_id: studentMarksTable.subject_id,
 				internal_marks: studentMarksTable.internal_marks,
 				external_marks: studentMarksTable.external_marks,
 				total_marks: studentMarksTable.total_marks,
 				is_pass: studentMarksTable.is_pass,
-				created_at: studentMarksTable.created_at,
-				updated_at: studentMarksTable.updated_at,
-				subject: {
-					id: subjectTable.id,
-					title: subjectTable.title,
-					code: subjectTable.code,
-					internal_marks: subjectTable.internal_marks,
-					external_marks: subjectTable.external_marks,
-					internal_passing_marks: subjectTable.internal_passing_marks,
-					external_passing_marks: subjectTable.external_passing_marks,
-				},
 			})
 			.from(studentMarksTable)
-			.innerJoin(
-				subjectTable,
-				eq(studentMarksTable.subject_id, subjectTable.id)
-			)
 			.where(
 				and(
 					eq(studentMarksTable.student_id, student_id),
@@ -665,11 +675,32 @@ export async function getStudentSemesterMarks(
 				)
 			);
 
+		// Create a map of subject_id to marks for easy lookup
+		const marksMap = new Map(studentMarks.map(mark => [mark.subject_id, mark]));
+
+		// Combine subjects with marks
+		const subjectsWithMarks = allSubjects.map(subject => {
+			const marks = marksMap.get(subject.id);
+			return {
+				...subject,
+				internal_marks: marks?.internal_marks || null,
+				external_marks: marks?.external_marks || null,
+				total_internal_marks: subject.internal_marks,
+				total_external_marks: subject.external_marks,
+				total_marks: marks?.total_marks || null,
+				is_pass: marks?.is_pass || null,
+			};
+		});
+
 		return {
 			data: {
-				student,
+				student: {
+					id: student.id,
+					first_name: student.first_name,
+					last_name: student.last_name,
+				},
 				semester,
-				marks,
+				subjects: subjectsWithMarks,
 			},
 		};
 	} catch (error) {
@@ -686,6 +717,7 @@ export async function getStudentSemesters(student_id: number) {
 				id: studentTable.id,
 				first_name: userTable.first_name,
 				last_name: userTable.last_name,
+				batch_id: studentTable.batch_id,
 			})
 			.from(studentTable)
 			.innerJoin(userTable, eq(studentTable.user_id, userTable.id))
@@ -695,30 +727,61 @@ export async function getStudentSemesters(student_id: number) {
 			return { error: "STUDENT_NOT_FOUND" };
 		}
 
-		// Get all semesters with marks status
+		// Get all semesters for the student's batch
 		const semesters = await db
 			.select({
 				id: semesterTable.id,
 				title: semesterTable.title,
 				start_date: semesterTable.start_date,
 				end_date: semesterTable.end_date,
-				marks_count: sql<number>`count(${studentMarksTable.id})`,
 			})
 			.from(semesterTable)
-			.leftJoin(
-				studentMarksTable,
-				and(
-					eq(studentMarksTable.semester_id, semesterTable.id),
-					eq(studentMarksTable.student_id, student_id)
+			.where(eq(semesterTable.batch_id, student.batch_id))
+			.orderBy(semesterTable.id);
+
+		// Get marks for each semester
+		const marksPromises = semesters.map(async semester => {
+			const marks = await db
+				.select({
+					id: studentMarksTable.id,
+					subject_id: subjectTable.id,
+					title: subjectTable.title,
+					code: subjectTable.code,
+					internal_marks: studentMarksTable.internal_marks,
+					external_marks: studentMarksTable.external_marks,
+					total_internal_marks: subjectTable.internal_marks,
+					total_external_marks: subjectTable.external_marks,
+					total_marks: studentMarksTable.total_marks,
+					is_pass: studentMarksTable.is_pass,
+				})
+				.from(studentMarksTable)
+				.innerJoin(
+					subjectTable,
+					eq(studentMarksTable.subject_id, subjectTable.id)
 				)
-			)
-			.groupBy(semesterTable.id)
-			.orderBy(semesterTable.start_date);
+				.where(
+					and(
+						eq(studentMarksTable.student_id, student_id),
+						eq(studentMarksTable.semester_id, semester.id)
+					)
+				);
+
+			return {
+				...semester,
+				marks: marks || [],
+			};
+		});
+
+		const semestersWithMarks = await Promise.all(marksPromises);
 
 		return {
 			data: {
-				student,
-				semesters,
+				student: {
+					id: student.id,
+					first_name: student.first_name,
+					last_name: student.last_name,
+				},
+				semesters: semestersWithMarks,
 			},
 		};
 	} catch (error) {

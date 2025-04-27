@@ -22,6 +22,13 @@
 			border: 1px solid black;
 			border-collapse: collapse;
 		}
+		.semester-table {
+			margin-bottom: 20px;
+		}
+		.semester-title {
+			font-weight: 600;
+			margin: 10px 0;
+		}
 	</style>
 	<body>
 		<div
@@ -120,16 +127,7 @@
 						<strong>{branch}</strong>
 						at this Institute from <strong>{session_start}</strong> to
 						<strong>{session_end}</strong> has passed the final diploma
-						examination held in <strong>{exam_session}</strong> under State
-						Board Roll No. <strong>{state_board_roll}</strong> as per result
-						Notification No. <strong>{notification_number}</strong> dated
-						<strong>{notification_date}</strong> received from the State Board
-						of Technical Education, Punjab, Chandigarh.
-						<br />
-						2. This makes him / her eligible for the award of diploma in
-						<strong>{diploma_name}</strong>. The diploma as such shall be issued
-						to him/her as and when received from the Punjab State Board of
-						TechnicalEducation, Chandigarh.
+						examination
 					</p>
 				</div>
 				<div>
@@ -146,6 +144,7 @@
 					</h1>
 				</div>
 				<div>
+					<!-- Semester summary table -->
 					<table
 						style="
 							width: 100%;
@@ -159,43 +158,6 @@
 							<th style="font-weight: 400">Month/Year of Examination</th>
 							<th style="font-weight: 400">Mark's Obtained</th>
 							<th style="font-weight: 400">Maximum Marks</th>
-						</tr>
-
-						<tr>
-							<td>1st</td>
-							<td>{sem1_date}</td>
-							<td>{sem1_marks}</td>
-							<td>{sem1_total}</td>
-						</tr>
-						<tr>
-							<td>2nd</td>
-							<td>{sem2_date}</td>
-							<td>{sem2_marks}</td>
-							<td>{sem2_total}</td>
-						</tr>
-						<tr>
-							<td>3rd</td>
-							<td>{sem3_date}</td>
-							<td>{sem3_marks}</td>
-							<td>{sem3_total}</td>
-						</tr>
-						<tr>
-							<td>4th</td>
-							<td>{sem4_date}</td>
-							<td>{sem4_marks}</td>
-							<td>{sem4_total}</td>
-						</tr>
-						<tr>
-							<td>5th</td>
-							<td>{sem5_date}</td>
-							<td>{sem5_marks}</td>
-							<td>{sem5_total}</td>
-						</tr>
-						<tr>
-							<td>6th</td>
-							<td>{sem6_date}</td>
-							<td>{sem6_marks}</td>
-							<td>{sem6_total}</td>
 						</tr>
 					</table>
 				</div>
