@@ -21,25 +21,18 @@ interface StudentData {
 	diploma_name?: string;
 	conduct?: string;
 
-	// Semester data
-	sem1_date?: string;
-	sem1_marks?: string;
-	sem1_total?: string;
-	sem2_date?: string;
-	sem2_marks?: string;
-	sem2_total?: string;
-	sem3_date?: string;
-	sem3_marks?: string;
-	sem3_total?: string;
-	sem4_date?: string;
-	sem4_marks?: string;
-	sem4_total?: string;
-	sem5_date?: string;
-	sem5_marks?: string;
-	sem5_total?: string;
-	sem6_date?: string;
-	sem6_marks?: string;
-	sem6_total?: string;
+	// Dynamic semester data
+	semesters: {
+		semester_number: number;
+		date: string;
+		subjects: {
+			title: string;
+			marks_obtained: number;
+			maximum_marks: number;
+		}[];
+		total_marks_obtained: number;
+		total_maximum_marks: number;
+	}[];
 
 	// Summary data
 	total_marks?: string;
@@ -116,43 +109,35 @@ export async function generateCertificate(data: StudentData) {
 			template = template.replace(/{diploma_name}/g, data.diploma_name);
 		if (data.conduct) template = template.replace(/{conduct}/g, data.conduct);
 
-		// Replace semester data placeholders
-		if (data.sem1_date)
-			template = template.replace(/{sem1_date}/g, data.sem1_date);
-		if (data.sem1_marks)
-			template = template.replace(/{sem1_marks}/g, data.sem1_marks);
-		if (data.sem1_total)
-			template = template.replace(/{sem1_total}/g, data.sem1_total);
-		if (data.sem2_date)
-			template = template.replace(/{sem2_date}/g, data.sem2_date);
-		if (data.sem2_marks)
-			template = template.replace(/{sem2_marks}/g, data.sem2_marks);
-		if (data.sem2_total)
-			template = template.replace(/{sem2_total}/g, data.sem2_total);
-		if (data.sem3_date)
-			template = template.replace(/{sem3_date}/g, data.sem3_date);
-		if (data.sem3_marks)
-			template = template.replace(/{sem3_marks}/g, data.sem3_marks);
-		if (data.sem3_total)
-			template = template.replace(/{sem3_total}/g, data.sem3_total);
-		if (data.sem4_date)
-			template = template.replace(/{sem4_date}/g, data.sem4_date);
-		if (data.sem4_marks)
-			template = template.replace(/{sem4_marks}/g, data.sem4_marks);
-		if (data.sem4_total)
-			template = template.replace(/{sem4_total}/g, data.sem4_total);
-		if (data.sem5_date)
-			template = template.replace(/{sem5_date}/g, data.sem5_date);
-		if (data.sem5_marks)
-			template = template.replace(/{sem5_marks}/g, data.sem5_marks);
-		if (data.sem5_total)
-			template = template.replace(/{sem5_total}/g, data.sem5_total);
-		if (data.sem6_date)
-			template = template.replace(/{sem6_date}/g, data.sem6_date);
-		if (data.sem6_marks)
-			template = template.replace(/{sem6_marks}/g, data.sem6_marks);
-		if (data.sem6_total)
-			template = template.replace(/{sem6_total}/g, data.sem6_total);
+		// Generate dynamic semester table HTML
+		let semesterTableHtml = `
+			<table style="width: 100%; text-align: center; font-weight: 200; font-size: 14px;">
+				<tr>
+					<th style="font-weight: 400">Semester</th>
+					<th style="font-weight: 400">Month/Year of Examination</th>
+					<th style="font-weight: 400">Mark's Obtained</th>
+					<th style="font-weight: 400">Maximum Marks</th>
+				</tr>
+		`;
+
+		// Add rows for each semester
+		data.semesters.forEach(semester => {
+			semesterTableHtml += `
+				<tr>
+					<td>${semester.semester_number}${getOrdinalSuffix(
+				semester.semester_number
+			)}</td>
+					<td>${semester.date}</td>
+					<td>${semester.total_marks_obtained}</td>
+					<td>${semester.total_maximum_marks}</td>
+				</tr>
+			`;
+		});
+
+		semesterTableHtml += `</table>`;
+
+		// Replace the static table with the dynamic one
+		template = template.replace(/<table[\s\S]*?<\/table>/, semesterTableHtml);
 
 		// Replace summary placeholders
 		if (data.total_marks)
@@ -177,4 +162,14 @@ export async function generateCertificate(data: StudentData) {
 			details: error instanceof Error ? error.message : "Unknown error",
 		};
 	}
+}
+
+// Helper function to get ordinal suffix
+function getOrdinalSuffix(n: number): string {
+	const j = n % 10;
+	const k = n % 100;
+	if (j === 1 && k !== 11) return "st";
+	if (j === 2 && k !== 12) return "nd";
+	if (j === 3 && k !== 13) return "rd";
+	return "th";
 }

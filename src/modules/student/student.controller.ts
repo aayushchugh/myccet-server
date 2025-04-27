@@ -20,6 +20,7 @@ import {
 } from "./student.schema";
 import { z } from "zod";
 import { generateCertificate } from "../../services/certificate.service";
+import { format } from "date-fns";
 
 export async function postCreateStudentHandler(
 	req: Request<{}, {}, z.infer<typeof postCreateStudentSchema>>,
@@ -483,14 +484,75 @@ export async function getProvisionalCertificateHandler(
 			return;
 		}
 
+		// Get all semesters with marks for the student
+		const semestersResult = await getStudentSemesters(studentId);
+		if (semestersResult.error || !semestersResult.data) {
+			res.status(404).json({
+				success: false,
+				error: semestersResult.error || "DATA_NOT_FOUND",
+				message: "Failed to get student semesters",
+			});
+			return;
+		}
+
+		// Transform semester data into the format expected by generateCertificate
+		const semesters = semestersResult.data.semesters.map(semester => {
+			const totalMarks = semester.marks.reduce(
+				(sum, mark) => sum + (mark.total_marks || 0),
+				0
+			);
+			const totalMaxMarks = semester.marks.reduce(
+				(sum, mark) =>
+					sum + (mark.total_internal_marks + mark.total_external_marks),
+				0
+			);
+
+			return {
+				semester_number: semester.id,
+				date: semester.end_date
+					? format(new Date(semester.end_date), "MMM/yyyy")
+					: "",
+				subjects: semester.marks.map(mark => ({
+					title: mark.title,
+					marks_obtained: mark.total_marks || 0,
+					maximum_marks: mark.total_internal_marks + mark.total_external_marks,
+				})),
+				total_marks_obtained: totalMarks,
+				total_maximum_marks: totalMaxMarks,
+			};
+		});
+
+		// Calculate overall totals
+		const totalMarks = semesters.reduce(
+			(sum, sem) => sum + sem.total_marks_obtained,
+			0
+		);
+		const totalMaxMarks = semesters.reduce(
+			(sum, sem) => sum + sem.total_maximum_marks,
+			0
+		);
+		const percentage = ((totalMarks / totalMaxMarks) * 100).toFixed(2);
+
+		// Determine division based on percentage
+		let division = "";
+		if (parseFloat(percentage) >= 60) division = "First Division";
+		else if (parseFloat(percentage) >= 50) division = "Second Division";
+		else if (parseFloat(percentage) >= 40) division = "Third Division";
+		else division = "Fail";
+
 		const result = await generateCertificate({
 			student_name: `${student.first_name} ${student.last_name || ""}`,
 			father_name: student.father_name || "",
 			roll_number: student.registration_number.toString(),
 			registration_number: student.registration_number.toString(),
 			branch: student.branch?.title || "",
-			issue_date: new Date().toLocaleDateString(),
+			issue_date: new Date().toISOString(),
 			session: "2023-2024", // This should be dynamic based on your requirements
+			semesters,
+			total_marks: totalMarks.toString(),
+			maximum_marks: totalMaxMarks.toString(),
+			percentage,
+			division,
 		});
 
 		// Set response headers for PDF download
